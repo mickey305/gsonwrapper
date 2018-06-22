@@ -24,7 +24,7 @@ public class UnknownTest {
   public void testWithSerializer() {
 
     
-    Serializer<Foo>serializer = new Serializer<>(new FooAdapter());    
+    Serializer<Foo>serializer = new Serializer<>(Foo.class);    
     Foo object = serializer.deserialize(
         "{'bar':{'mapList':[{'k1':'apple','k2':'orange'},{'k1':'lemmon','k2':'banana'}]}}");
 
