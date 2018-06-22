@@ -1,4 +1,4 @@
-package com.gwtcenter.json;
+package com.cm55.gson;
 
 public class PrintJsonForTest {
   public static void printJson(String json) {

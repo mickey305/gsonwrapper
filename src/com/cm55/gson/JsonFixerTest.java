@@ -1,10 +1,10 @@
-package com.gwtcenter.json;
+package com.cm55.gson;
 
 import static org.junit.Assert.*;
 
 import org.junit.*;
 
-import com.gwtcenter.json.JsonFixer.*;
+import com.cm55.gson.JsonFixer.*;
 
 
 public class JsonFixerTest {

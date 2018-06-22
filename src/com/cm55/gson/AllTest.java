@@ -1,4 +1,4 @@
-package com.gwtcenter.json;
+package com.cm55.gson;
 
 import org.junit.runner.*;
 import org.junit.runners.*;

@@ -1,4 +1,4 @@
-package com.gwtcenter.json;
+package com.cm55.gson;
 
 /**
  * このラッパライブラリで発生するすべての例外はこのオブジェクトにラップされる。

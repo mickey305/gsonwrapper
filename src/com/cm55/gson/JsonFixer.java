@@ -1,8 +1,8 @@
-package com.gwtcenter.json;
+package com.cm55.gson;
 
 import java.util.*;
 
-import com.gwtcenter.json.Json.*;
+import com.cm55.gson.Json.*;
 
 
 /**

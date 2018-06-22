@@ -1,4 +1,4 @@
-package com.gwtcenter.json;
+package com.cm55.gson;
 
 import static org.junit.Assert.*;
 
@@ -14,7 +14,32 @@ import com.google.gson.reflect.*;
  */
 public class SerializerTest {
 
-
+    
+  public static class Simple1 {
+    ArrayList<Simple2>list = new ArrayList<>();
+    int b = 2;
+  }
+  public static class Simple2 {
+    int c = 3;
+  }
+  
+  @Test
+  public void シンプルなテスト() {    
+    Serializer<Simple1> serializer = new Serializer<>(Simple1.class);
+    Simple1 s = new Simple1();
+    s.list.add(new Simple2());
+    s.list.add(new Simple2());
+    String json = serializer.serialize(s);
+    System.out.println("" + json);
+    assertEquals("{\"list\":[{\"c\":3},{\"c\":3}],\"b\":2}", json);
+    
+    s = serializer.deserialize(json);
+    assertEquals(2, s.b);
+    assertEquals(ArrayList.class, s.list.getClass());
+    assertEquals(2, s.list.size());
+    assertEquals(3, s.list.get(0).c);
+  }
+  
   
   /**
    * 抽象クラスFooを直列化する。実際にはFooの下位クラスFooOneが直列化される。

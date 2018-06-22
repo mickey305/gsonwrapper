@@ -92,5 +92,5 @@
  * }
  * </pre>
  */
-package com.gwtcenter.json;
+package com.cm55.gson;
 
