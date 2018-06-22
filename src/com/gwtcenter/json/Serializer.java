@@ -16,7 +16,7 @@ import com.google.gson.reflect.*;
  * <ul>
  * <li>1.対象とするオブジェクトのクラス
  * <li>2.上記クラスがジェネリッククラスの場合には、その{@link TypeToken}
- * <li>3.{@link AbstractAdapter}クラス階層以下のタイプアダプタ
+ * <li>3.{@link Adapter}クラス階層以下のタイプアダプタ
  * </ul>
  * <p>
  * 単純なオブジェクトの場合には、1.2.のいずれかで良いが、以下のようなケースでは、3.を選択し、
@@ -67,15 +67,24 @@ public class Serializer<T> {
    * @return シリアライザ
    */
   public Serializer(Class<T>clazz) {
-    this(new BaseAdapter<T>(clazz));
+    this(new Adapter<T>(clazz));
+  }
+
+  /**
+   * {@link TypeToken}について{@link BaseAdapter}を省略してシリアライザを作成する。
+   * @param token {@link TypeToken}
+   * @return シリアライザ
+   */
+  public Serializer(TypeToken<T>token) {
+    this(new Adapter<T>(token));
   }
   
   /**
-   * {@link AbstractAdapter}を指定して{@link Serializer}オブジェクトを作成する。
+   * {@link Adapter}を指定して{@link Serializer}オブジェクトを作成する。
    * @param def 直列化定義オブジェクト
    * @return 直列化実行オブジェクト
    */
-  public Serializer(AbstractAdapter<T> adapter) {
+  public Serializer(Adapter<T> adapter) {
         
     // このアダプタおよび、複数のサブアダプタをGsonBuilderに登録する
     GsonBuilder builder = createGsonBuilder();
@@ -86,18 +95,6 @@ public class Serializer<T> {
     
     setup(adapter.getTargetType(), gson);
   }    
-
-  
-
-  /**
-   * {@link TypeToken}について{@link BaseAdapter}を省略してシリアライザを作成する。
-   * @param token {@link TypeToken}
-   * @return シリアライザ
-   */
-  public Serializer(TypeToken<T>token) {
-    this(new BaseAdapter<T>(token));
-  }
-  
   
   public Serializer(TypeToken<T> topType, Gson gson) {
     setup(topType, gson);

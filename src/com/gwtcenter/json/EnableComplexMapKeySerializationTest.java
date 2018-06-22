@@ -59,7 +59,7 @@ public class EnableComplexMapKeySerializationTest {
     }    
   }
 
-  public static class TheObjectAdapter extends AbstractAdapter<TheObject> {
+  public static class TheObjectAdapter extends Adapter<TheObject> {
     public static final TheObjectAdapter INSTANCE = new TheObjectAdapter();
     public TheObjectAdapter() {
       super(TheObject.class);

@@ -11,7 +11,7 @@ import com.google.gson.reflect.*;
  * @author ysugimura
  * @param <T> アダプタの対象とするクラスの型
  */
-public class  AbstractAdapter<T> {
+public class  Adapter<T> {
 
   /** 
    * 対象タイプ
@@ -30,15 +30,15 @@ public class  AbstractAdapter<T> {
   /** 
    * サブアダプタリスト
    * <p>
-   * 対象とするタイプ（クラス）のフィールド等の型にたいするアダプタがもし必要であればここに格納される。
+   * 対象とするタイプ（クラス）のフィールド等の型に対するアダプタがもし必要であればここに格納される。
    * 全く必要でない場合は{@link #subAdapters}の値はnullのまま
    * </p>
    */
-  private List<AbstractAdapter<?>>subAdapters = null;
+  private List<Adapter<?>>subAdapters = null;
   
 
   /** クラスを指定する */
-  protected AbstractAdapter(Class<T>targetClass) {
+  protected Adapter(Class<T>targetClass) {
     this(TypeToken.get(targetClass));
   }
 
@@ -52,7 +52,7 @@ public class  AbstractAdapter<T> {
    * </p>
    * @param targetToken
    */
-  protected AbstractAdapter(TypeToken<T>targetToken) {
+  protected Adapter(TypeToken<T>targetToken) {
     targetType = targetToken;
   }
   
@@ -72,8 +72,8 @@ public class  AbstractAdapter<T> {
    * </p>
    * @param subAdapter サブアダプタ
    */
-  public void addSubAdapter(AbstractAdapter<?> subAdapter) {
-    if (subAdapters == null) subAdapters = new ArrayList<AbstractAdapter<?>>();
+  public void addSubAdapter(Adapter<?> subAdapter) {
+    if (subAdapters == null) subAdapters = new ArrayList<Adapter<?>>();
     subAdapters.add(subAdapter);
   }
   
@@ -87,7 +87,7 @@ public class  AbstractAdapter<T> {
 
     // サブアダプタがもしあれば、これらについての特殊処理を行う。
     if (subAdapters == null) return;
-    for (AbstractAdapter<?> subAdapter: subAdapters) {
+    for (Adapter<?> subAdapter: subAdapters) {
       subAdapter.registerToBuilder(builder);
     }
   }

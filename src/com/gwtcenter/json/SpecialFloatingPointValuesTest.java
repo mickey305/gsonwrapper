@@ -10,8 +10,7 @@ public class SpecialFloatingPointValuesTest {
 
   @Before
   public void before() {
-    serializer = new Serializer<>(
-        new BaseAdapter<Sample>(Sample.class));
+    serializer = new Serializer<>(Sample.class);
   }
 
   @Test

@@ -45,18 +45,18 @@ public class UnknownTest {
     List<Map<String, String>>mapList;    
   }
 
-  public static class FooAdapter extends BaseAdapter<Foo> {
+  public static class FooAdapter extends Adapter<Foo> {
     FooAdapter() {
       super(Foo.class);
       addSubAdapter(new BarAdapter());
     }
   }
   
-  public static class BarAdapter extends BaseAdapter<Bar> {
+  public static class BarAdapter extends Adapter<Bar> {
     public BarAdapter() {
       super(Bar.class);
       this.addSubAdapter(
-        new BaseAdapter<List<Map<String, String>>>(new TypeToken<List<Map<String, String>>>(){})
+        new Adapter<List<Map<String, String>>>(new TypeToken<List<Map<String, String>>>(){})
       );
     }
   }

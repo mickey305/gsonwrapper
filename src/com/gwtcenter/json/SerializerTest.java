@@ -187,7 +187,7 @@ public class SerializerTest {
    * @author ysugimura
    *
    */
-  public static class VariousHashMapAdapter extends AbstractAdapter<HashMap<Various, String>> {
+  public static class VariousHashMapAdapter extends Adapter<HashMap<Various, String>> {
     public static VariousHashMapAdapter INSTANCE = new VariousHashMapAdapter();
     
     public VariousHashMapAdapter() {
@@ -203,7 +203,7 @@ public class SerializerTest {
    * @author ysugimura
    *
    */
-  public static class VariousArrayListAdapter extends AbstractAdapter<ArrayList<Various>> {
+  public static class VariousArrayListAdapter extends Adapter<ArrayList<Various>> {
     public static VariousArrayListAdapter INSTANCE = new VariousArrayListAdapter();
     
     public VariousArrayListAdapter() {
@@ -245,7 +245,7 @@ public class SerializerTest {
     }
   }
 
-  public static class VariousAdapter extends AbstractAdapter<Various> {    
+  public static class VariousAdapter extends Adapter<Various> {    
     public static VariousAdapter INSTANCE = new VariousAdapter();    
     public VariousAdapter() {
       super(Various.class);

@@ -8,8 +8,6 @@ import com.google.gson.reflect.*;
 
 public class MultiTypeAdapterTest {
 
-
-  
   @Before
   public void before() {
 

@@ -11,6 +11,7 @@ import com.google.gson.stream.*;
  * JSON化するオブジェクト中のフィールドに格納されるタイプが単一でないときがある。
  * 例えば、「Sample sample;」というフィールドには、次のいずれかのオブジェクトが格納される場合がある。
  * <pre>
+ * class abstract class Sample { ... }
  * class SampleA extends Sample { ... }
  * class SampleB extends Sample { ... }
  * </pre>
@@ -24,14 +25,12 @@ import com.google.gson.stream.*;
  * }
  * </pre>
  * <p>
- * このような場合には、フィールド値をそのまま格納してはいけない。直列化復帰の際に、どちらのオブジェクトであるか
- * がわからなくなるからである。直列化のときにも直列化復帰の時にも、格納されるオブジェクトについて特別な処理
- * を行わなければならない。
+ * このような場合には、フィールド値をそのまま格納してはいけない。直列化復帰の際に、SampleA、SampleBのいずれのオブジェクトであるか
+ * がわからなくなるからである。直列化のときにも直列化復帰の時にも、格納されるオブジェクトについて特別な処理を行わなければならない。
  * </p>
  * <p>
- * {@link MultiTypeAdapter}は、あるクラスの代わりとなる可能性のあるすべてのクラスを定義しておき、
- * 直列化の際にも直列化復帰の際にもいずれのクラスであるかを識別するために用いられる。
- * 具体的には、以下のように行う。
+ * {@link MultiTypeAdapter}は、あるクラスの代わりとなる可能性のあるすべてのクラスを定義しておき、直列化の際にも直列化復帰の際にも
+ * どのクラスであるかを識別するために用いられる。具体的には、以下のように行う。
  * </p>
  * <pre>
  * class MyAdapter extends MultiTypeAdapter<Sample> {
@@ -54,7 +53,7 @@ import com.google.gson.stream.*;
  *
  * @param <T>
  */
-public class MultiTypeAdapter<T> extends AbstractAdapter<T> {
+public class MultiTypeAdapter<T> extends Adapter<T> {
 
   private static final boolean DEBUG = false;
   
@@ -102,10 +101,19 @@ public class MultiTypeAdapter<T> extends AbstractAdapter<T> {
     addSubClass(clazz.getSimpleName(), clazz);
   }
   
+  /**
+   * 登録するタイプトークンを指定する。名称はRawタイプの{@link Class#getSimpleName()}となる。
+   * @param typeClass
+   */
   public void addSubClass(TypeToken<? extends T>typeClass) {
     addSubClass(typeClass.getRawType().getSimpleName(), typeClass);
   }
-  
+
+  /** 
+   * 登録するクラスと、その名称を指定する
+   * @param typeName 登録名称
+   * @param typeClass 登録クラス
+   */
   public void addSubClass(String typeName, Class<? extends T> typeClass) {
     addSubClass(typeName, TypeToken.get(typeClass));
   }
@@ -113,12 +121,12 @@ public class MultiTypeAdapter<T> extends AbstractAdapter<T> {
   /**
    * タイプ名称とそのクラスを指定して登録する。
    * 既に登録されている場合は例外が発生する。
-   * @param typeName　登録名称
-   * @param typeClass　登録クラス
+   * @param typeName　登録名称 JSON中に書き出されるマーカー文字列
+   * @param typeToken　登録クラス 上記マーカー文字列の場合に中身とされるクラスのタイプトークン
    */
   public void addSubClass(String typeName, TypeToken<? extends T> typeToken) {    
     TypeToken<T> topType = getTargetType();
-    if (!topType.isAssignableFrom(typeToken)) {
+    if (!topType.getRawType().isAssignableFrom(typeToken.getRawType())) {
       throw new IllegalArgumentException(
           typeToken + " is not assignable to " + topType);
     }    

@@ -122,6 +122,7 @@ public class Json {
       }      
     }
     
+    @SuppressWarnings("unchecked")
     @Override
     public <T extends JElement> T get(String fieldName) {
       return (T)map.get(fieldName);

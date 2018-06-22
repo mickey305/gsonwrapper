@@ -29,10 +29,8 @@
  *   }
  * }
  * ...
- * @Inject SerializerFactory serializerFactory;
- * ...
  * public void execute() {
- *   Serializer<Foo>serializer = serializerFactory.create(FooAdapter.INSTANCE);
+ *   Serializer<Foo>serializer = new Serializer(FooAdapter.INSTANCE);
  *   Foo in = new Foo();
  *   String json = serializer.serialize(in);
  *   Foo out = serializer.deserialize(json);
