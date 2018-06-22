@@ -47,10 +47,7 @@ import com.google.gson.reflect.*;
  * @param <T>
  */
 public class Serializer<T> {
-  
-  
-  /** JSONのエンコーディング */
-  private static final String ENCODING = "UTF-8";
+
   
   /** このシリアライザが直列化及び復帰を行う対象のクラス */
   private TypeToken<T> topType;
@@ -67,7 +64,7 @@ public class Serializer<T> {
    * @return シリアライザ
    */
   public Serializer(Class<T>clazz) {
-    this(new Adapter<T>(clazz));
+    this(new AdapterBuilder<T>(clazz).build());
   }
 
   /**
@@ -76,7 +73,7 @@ public class Serializer<T> {
    * @return シリアライザ
    */
   public Serializer(TypeToken<T>token) {
-    this(new Adapter<T>(token));
+    this(new AdapterBuilder<T>(token).build());
   }
   
   /**
@@ -93,7 +90,7 @@ public class Serializer<T> {
     // gsonを作成する
     Gson gson = builder.create();
     
-    setup(adapter.getTargetType(), gson);
+    setup(adapter.getTypeToken(), gson);
   }    
   
   public Serializer(TypeToken<T> topType, Gson gson) {
@@ -138,7 +135,7 @@ public class Serializer<T> {
   public byte[]serializeToBytes(T object) {
     if (object == null) return null;
     try {
-      return serialize(object).getBytes(ENCODING);
+      return serialize(object).getBytes(Consts.ENCODING);
     } catch (Exception ex) {
       throw new JsonException(ex);
     }
@@ -195,7 +192,7 @@ public class Serializer<T> {
   public T deserializeFromBytes(byte[]bytes) {
     if (bytes == null) return null;
     try {
-      return deserialize(new String(bytes, ENCODING));
+      return deserialize(new String(bytes, Consts.ENCODING));
     } catch (Exception ex) {
       throw new JsonException(ex);
     }

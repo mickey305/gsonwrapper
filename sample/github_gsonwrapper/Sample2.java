@@ -15,9 +15,9 @@ public class Sample2 {
   @Test
   public void test() {
     
-    Adapter<Foo>fooAdapter = new Adapter<>(Foo.class).addSubAdapter(
-      new MultiTypeAdapter<>(Bar.class).addSubClasses(Bar1.class, Bar2.class)
-    );
+    Adapter<Foo>fooAdapter = new AdapterBuilder<>(Foo.class).addSubAdapter(
+      new MultiTypeAdapterBuilder<>(Bar.class).addSubClasses(Bar1.class, Bar2.class).build()
+    ).build();
 
     
     // Fooに対するシリアライザを作成する

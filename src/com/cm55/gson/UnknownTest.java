@@ -45,21 +45,12 @@ public class UnknownTest {
     List<Map<String, String>>mapList;    
   }
 
-  public static class FooAdapter extends Adapter<Foo> {
-    FooAdapter() {
-      super(Foo.class);
-      addSubAdapter(new BarAdapter());
-    }
-  }
-  
-  public static class BarAdapter extends Adapter<Bar> {
-    public BarAdapter() {
-      super(Bar.class);
-      this.addSubAdapter(
-        new Adapter<List<Map<String, String>>>(new TypeToken<List<Map<String, String>>>(){})
-      );
-    }
-  }
+
+  static Adapter<Bar>BAR_ADAPTER = new AdapterBuilder<>(Bar.class).addSubAdapter(
+      new AdapterBuilder<List<Map<String, String>>>(new TypeToken<List<Map<String, String>>>(){}).build()
+   ).build();
+  static Adapter<Foo>FOO_ADAPTER = new AdapterBuilder<>(Foo.class).addSubAdapter(BAR_ADAPTER).build();
+
   
   /**
    * gsonのみを使う例。

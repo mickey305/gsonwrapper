@@ -56,22 +56,18 @@ import com.google.gson.stream.*;
 public class MultiTypeAdapter<T> extends Adapter<T> {
 
   private static final boolean DEBUG = false;
-  
-  /** タイプフィールドマーカ */
-  private static final String TYPE_FIELD = "T";
 
-  /** データフィールドマーカ */
-  private static final String DATA_FIELD = "D";
   
   /** TypeTokenのマップ */
-  private TypeTokenNameMap typeTokenMap = new TypeTokenNameMap ();
+  private final TypeTokenNameMap typeTokenMap;
   
   /** 
    * 処理対象タイプを指定する
    * @param targetType
    */
-  public MultiTypeAdapter(Class<T> targetType) {
-    super(targetType);
+   MultiTypeAdapter(TypeToken<T> targetType,  List<Adapter<?>>subAdapters, TypeTokenNameMap typeTokenMap) {
+    super(targetType, subAdapters);
+    this.typeTokenMap = typeTokenMap;
   }
   
   /**
@@ -80,64 +76,7 @@ public class MultiTypeAdapter<T> extends Adapter<T> {
   public int subClassCount() {
     return typeTokenMap.count();
   }
-  
-  /**
-   * 登録するタイプを複数指定する。
-   * 各クラスの登録名称は{@link Class#getSimpleName()}で取得される文字列になる。
-   * @param classes 登録対象クラス（複数）
-   */
-  @SafeVarargs
-  public final MultiTypeAdapter<T> addSubClasses(Class<? extends T>...classes){
-    for (Class<? extends T> clazz : classes) {
-      addSubClass(clazz);
-    }    
-    return this;
-  }
-
-  /**
-   * 登録するタイプを指定する。名称は{@link Class#getSimpleName()}となる。
-   * @param clazz 対象クラス
-   */
-  public MultiTypeAdapter<T> addSubClass(Class<? extends T> clazz) {
-    addSubClass(clazz.getSimpleName(), clazz);
-    return this;
-  }
-  
-  /**
-   * 登録するタイプトークンを指定する。名称はRawタイプの{@link Class#getSimpleName()}となる。
-   * @param typeClass
-   */
-  public MultiTypeAdapter<T> addSubClass(TypeToken<? extends T>typeClass) {
-    addSubClass(typeClass.getRawType().getSimpleName(), typeClass);
-    return this;
-  }
-
-  /** 
-   * 登録するクラスと、その名称を指定する
-   * @param typeName 登録名称
-   * @param typeClass 登録クラス
-   */
-  public MultiTypeAdapter<T> addSubClass(String typeName, Class<? extends T> typeClass) {
-    addSubClass(typeName, TypeToken.get(typeClass));
-    return this;
-  }
-  
-  /**
-   * タイプ名称とそのクラスを指定して登録する。
-   * 既に登録されている場合は例外が発生する。
-   * @param typeName　登録名称 JSON中に書き出されるマーカー文字列
-   * @param typeToken　登録クラス 上記マーカー文字列の場合に中身とされるクラスのタイプトークン
-   */
-  public MultiTypeAdapter<T>  addSubClass(String typeName, TypeToken<? extends T> typeToken) {    
-    TypeToken<T> topType = getTargetType();
-    if (!topType.getRawType().isAssignableFrom(typeToken.getRawType())) {
-      throw new IllegalArgumentException(
-          typeToken + " is not assignable to " + topType);
-    }    
-    typeTokenMap.addType(typeName, typeToken);
-    return this;
-  }
-
+    
   /**
    * Gsonビルダに登録する
    */
@@ -150,12 +89,14 @@ public class MultiTypeAdapter<T> extends Adapter<T> {
     
     // 環境＝TypeAdapterFactoryをGsonに登録する
     builder.registerTypeAdapterFactory(new Environment<T>(
-        this.getTargetType(),
+        typeToken,
         this.typeTokenMap.duplicate()
     ));
     
     super.registerToBuilder(builder);
   }
+
+
 
   /**
    * 特定のGsonオブジェクト用の実行環境
@@ -263,10 +204,10 @@ public class MultiTypeAdapter<T> extends Adapter<T> {
       writer.beginObject();
       
       // 型フィールドを書き込み
-      writer.name(TYPE_FIELD).value(typeName);
+      writer.name(Consts.MULTITYPE_TYPE_MARKER).value(typeName);
       
       // データフィールドを書き込み
-      writer.name(DATA_FIELD);     
+      writer.name(Consts.MULTITYPE_DATA_MARKER);     
       env.elementAdapter.write(writer, tree);
 
       // オブジェクト書き込み終了
@@ -289,13 +230,13 @@ public class MultiTypeAdapter<T> extends Adapter<T> {
       
       // 型フィールド、データフィールドを読み出し
       String typeField = reader.nextName();
-      if (!typeField.equals(TYPE_FIELD)) {
+      if (!typeField.equals(Consts.MULTITYPE_TYPE_MARKER)) {
         // assertにしてしまうと復旧ができないので例外にする
         throw new JsonException("Invalid TYPE FIELD Marker in MultiTypeAdapter:" + typeField);
       }
       String typeName = reader.nextString();      
       String dataField = reader.nextName();
-      if (!dataField.equals(DATA_FIELD)) {
+      if (!dataField.equals(Consts.MULTITYPE_DATA_MARKER)) {
         // assertにしてしまうと復旧ができないので例外にする
         throw new JsonException("Invalid DATA FIELD Marker in MultiTypeAdapter:" + dataField);
       }

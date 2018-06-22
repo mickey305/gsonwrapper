@@ -212,13 +212,9 @@ public class SerializerTest {
    * @author ysugimura
    *
    */
-  public static class VariousHashMapAdapter extends Adapter<HashMap<Various, String>> {
-    public static VariousHashMapAdapter INSTANCE = new VariousHashMapAdapter();
-    
-    public VariousHashMapAdapter() {
-      super(new TypeToken<HashMap<Various, String>>() {});
-      addSubAdapter(FooAdapter.INSTANCE);
-    }
+  public static class VariousHashMapAdapter  {
+    public static  Adapter<HashMap<Various, String>> INSTANCE = 
+        new AdapterBuilder<>(new TypeToken<HashMap<Various, String>>() {}).addSubAdapter(FooAdapter.INSTANCE).build();
   }
   
   // ArrayList of Various /////////////////////////////////////////////////////
@@ -228,13 +224,11 @@ public class SerializerTest {
    * @author ysugimura
    *
    */
-  public static class VariousArrayListAdapter extends Adapter<ArrayList<Various>> {
-    public static VariousArrayListAdapter INSTANCE = new VariousArrayListAdapter();
+  public static class VariousArrayListAdapter  {
+    public static Adapter<ArrayList<Various>> INSTANCE = 
+        new AdapterBuilder<>(new TypeToken<ArrayList<Various>>() {}).
+      addSubAdapter(FooAdapter.INSTANCE).build();
     
-    public VariousArrayListAdapter() {
-      super(new TypeToken<ArrayList<Various>>() {});
-      addSubAdapter(FooAdapter.INSTANCE);
-    }
   }
 
   // Various //////////////////////////////////////////////////////////////////
@@ -270,12 +264,10 @@ public class SerializerTest {
     }
   }
 
-  public static class VariousAdapter extends Adapter<Various> {    
-    public static VariousAdapter INSTANCE = new VariousAdapter();    
-    public VariousAdapter() {
-      super(Various.class);
-      this.addSubAdapter(FooAdapter.INSTANCE);
-    }
+  public static class VariousAdapter  {    
+    public static  Adapter<Various> INSTANCE = 
+        new AdapterBuilder<>(Various.class).addSubAdapter(FooAdapter.INSTANCE).build();
+    
   }
 
   // Foo //////////////////////////////////////////////////////////////////////
@@ -319,13 +311,10 @@ public class SerializerTest {
     }
   }
   
-  public static class FooAdapter extends MultiTypeAdapter<Foo> {    
-    public static FooAdapter INSTANCE = new FooAdapter();    
-    public FooAdapter() {
-      super(Foo.class);
-      this.addSubClass(FooOne.class);
-      this.addSubClass(FooTwo.class);
-    }
+  public static class FooAdapter  {    
+    public static MultiTypeAdapter<Foo> INSTANCE = new MultiTypeAdapterBuilder<>(Foo.class)
+        .addSubClasses(FooOne.class, FooTwo.class).build();
+    
   }
 
   public static class Binary {
