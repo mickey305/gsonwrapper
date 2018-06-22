@@ -110,9 +110,9 @@ public class MultiTypeAdapterTest {
     public static final FooAdapter INSTANCE = new FooAdapter();
     public FooAdapter() {
       super(Foo.class);
-      addSubClass(new TypeToken<FooOne>() {});
-      addSubClass(new TypeToken<FooTwo>() {});
-      addSubClass(new TypeToken<FooThree>() {});
+      addSubClass(FooOne.class);
+      addSubClass(FooTwo.class);
+      addSubClass(FooThree.class);
       
       addSubAdapter(BarAdapter.INSTANCE);
       addSubAdapter(BarAdapter.INSTANCE); // duplicated registration is OK

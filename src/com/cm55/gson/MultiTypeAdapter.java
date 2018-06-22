@@ -86,27 +86,30 @@ public class MultiTypeAdapter<T> extends Adapter<T> {
    * 各クラスの登録名称は{@link Class#getSimpleName()}で取得される文字列になる。
    * @param classes 登録対象クラス（複数）
    */
-  @SuppressWarnings("unchecked")
-  public void addSubClasses(Class<? extends T>...classes){
+  @SafeVarargs
+  public final MultiTypeAdapter<T> addSubClasses(Class<? extends T>...classes){
     for (Class<? extends T> clazz : classes) {
       addSubClass(clazz);
     }    
+    return this;
   }
 
   /**
    * 登録するタイプを指定する。名称は{@link Class#getSimpleName()}となる。
    * @param clazz 対象クラス
    */
-  public void addSubClass(Class<? extends T> clazz) {
+  public MultiTypeAdapter<T> addSubClass(Class<? extends T> clazz) {
     addSubClass(clazz.getSimpleName(), clazz);
+    return this;
   }
   
   /**
    * 登録するタイプトークンを指定する。名称はRawタイプの{@link Class#getSimpleName()}となる。
    * @param typeClass
    */
-  public void addSubClass(TypeToken<? extends T>typeClass) {
+  public MultiTypeAdapter<T> addSubClass(TypeToken<? extends T>typeClass) {
     addSubClass(typeClass.getRawType().getSimpleName(), typeClass);
+    return this;
   }
 
   /** 
@@ -114,8 +117,9 @@ public class MultiTypeAdapter<T> extends Adapter<T> {
    * @param typeName 登録名称
    * @param typeClass 登録クラス
    */
-  public void addSubClass(String typeName, Class<? extends T> typeClass) {
+  public MultiTypeAdapter<T> addSubClass(String typeName, Class<? extends T> typeClass) {
     addSubClass(typeName, TypeToken.get(typeClass));
+    return this;
   }
   
   /**
@@ -124,13 +128,14 @@ public class MultiTypeAdapter<T> extends Adapter<T> {
    * @param typeName　登録名称 JSON中に書き出されるマーカー文字列
    * @param typeToken　登録クラス 上記マーカー文字列の場合に中身とされるクラスのタイプトークン
    */
-  public void addSubClass(String typeName, TypeToken<? extends T> typeToken) {    
+  public MultiTypeAdapter<T>  addSubClass(String typeName, TypeToken<? extends T> typeToken) {    
     TypeToken<T> topType = getTargetType();
     if (!topType.getRawType().isAssignableFrom(typeToken.getRawType())) {
       throw new IllegalArgumentException(
           typeToken + " is not assignable to " + topType);
     }    
     typeTokenMap.addType(typeName, typeToken);
+    return this;
   }
 
   /**
