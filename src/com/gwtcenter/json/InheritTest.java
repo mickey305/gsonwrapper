@@ -1,11 +1,8 @@
 package com.gwtcenter.json;
 
-import java.io.*;
-
-import org.junit.*;
 import static org.junit.Assert.*;
 
-import com.google.inject.*;
+import org.junit.*;
 
 /**
  * 上位オブジェクトとして直列化した後で、それを下位オブジェクトとして復帰させるテスト。
@@ -14,7 +11,7 @@ import com.google.inject.*;
  */
 public class InheritTest {
 
-  SerializerFactory factory;
+
   Serializer<Foo>fooSerializer;
   Serializer<Bar>barSerializer;
   Serializer<Diff>diffSerializer;
@@ -24,11 +21,11 @@ public class InheritTest {
   
   @Before
   public void before() {
-    factory = Guice.createInjector().getInstance(SerializerFactory.class);    
-    fooSerializer = factory.create(Foo.class);
-    barSerializer = factory.create(Bar.class);
-    diffSerializer = factory.create(Diff.class);
-    insaneSerializer = factory.create(Insane.class);    
+
+    fooSerializer = new Serializer<>(Foo.class);
+    barSerializer = new Serializer<>(Bar.class);
+    diffSerializer = new Serializer<>(Diff.class);
+    insaneSerializer = new Serializer<>(Insane.class);    
     
     foo = new Foo();
     foo.a = 123;

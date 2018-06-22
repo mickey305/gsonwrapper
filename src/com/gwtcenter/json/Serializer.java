@@ -5,19 +5,17 @@ import java.util.zip.*;
 
 import com.google.gson.*;
 import com.google.gson.reflect.*;
-import com.google.inject.*;
 
 /**
  * シリアライザ
  * 
  * <h2>概要</h2>
  * <p>
- * {@link Serializer}はあるオブジェクトの直列化と復帰を行うオブジェクト、{@link Serializer}を作成するには
- * {@link SerializerFactory}に対して、以下のいずれかを指定する。
+ * {@link Serializer}はあるオブジェクトの直列化と復帰を行うオブジェクト、コンストラクタ引数として以下のいずれかを指定する。
  * </p>
  * <ul>
  * <li>1.対象とするオブジェクトのクラス
- * <li>2.上記クラスがジェネリクスの場合には、その{@link TypeToken}
+ * <li>2.上記クラスがジェネリッククラスの場合には、その{@link TypeToken}
  * <li>3.{@link AbstractAdapter}クラス階層以下のタイプアダプタ
  * </ul>
  * <p>
@@ -48,14 +46,76 @@ import com.google.inject.*;
  *
  * @param <T>
  */
-@ImplementedBy(Serializer.Impl.class)
-public interface Serializer<T> {
+public class Serializer<T> {
+  
+  
+  /** JSONのエンコーディング */
+  private static final String ENCODING = "UTF-8";
+  
+  /** このシリアライザが直列化及び復帰を行う対象のクラス */
+  private TypeToken<T> topType;
+  
+  /** Gson実行オブジェクト */
+  private Gson gson;
+  
+  /** 復帰時にクラスが見つからない場合はnullを返す */
+  private boolean nullIfClassNotFound = true;
+  
+  /**
+   * 単純なクラスについて{@link BaseAdapter}を省略してシリアライザを作成する。
+   * @param clazz 対象とするクラス
+   * @return シリアライザ
+   */
+  public Serializer(Class<T>clazz) {
+    this(new BaseAdapter<T>(clazz));
+  }
+  
+  /**
+   * {@link AbstractAdapter}を指定して{@link Serializer}オブジェクトを作成する。
+   * @param def 直列化定義オブジェクト
+   * @return 直列化実行オブジェクト
+   */
+  public Serializer(AbstractAdapter<T> adapter) {
+        
+    // このアダプタおよび、複数のサブアダプタをGsonBuilderに登録する
+    GsonBuilder builder = createGsonBuilder();
+    adapter.registerToBuilder(builder);    
+
+    // gsonを作成する
+    Gson gson = builder.create();
+    
+    setup(adapter.getTargetType(), gson);
+  }    
+
+  
+
+  /**
+   * {@link TypeToken}について{@link BaseAdapter}を省略してシリアライザを作成する。
+   * @param token {@link TypeToken}
+   * @return シリアライザ
+   */
+  public Serializer(TypeToken<T>token) {
+    this(new BaseAdapter<T>(token));
+  }
+  
+  
+  public Serializer(TypeToken<T> topType, Gson gson) {
+    setup(topType, gson);
+  }
+  
+  private void setup(TypeToken<T> topType, Gson gson) {
+    this.topType = topType;
+    this.gson = gson;
+  }
   
   /**
    * 復帰時にクラスが見つからない場合にnullを返す。
    * @param value 
    */
-  public Serializer<T> setNullIfClassNotFound(boolean value);
+  public Serializer<T> setNullIfClassNotFound(boolean value) {
+    nullIfClassNotFound = value;
+    return this;
+  }
 
   /**
    * 指定されたオブジェクトをJSON文字列に変換する。オブジェクトはT型でなければいけない。
@@ -63,7 +123,14 @@ public interface Serializer<T> {
    * @param object 変換対象オブジェクト
    * @return オブジェクトをJSON化した文字列、またはnull
    */
-  public String serialize(T object);
+  public String serialize(T object) {
+    if (object == null) return null;
+    try {
+      return gson.toJson(object, topType.getType());
+    } catch (RuntimeException ex) {
+      throw new JsonException(ex);
+    }
+  }
   
   /**
    * 指定されたオブジェクトをJSON文字列に変換し、それをUTF-8文字列としてバイト配列に変換したものを返す。オブジェクトはT型でなければいけない。
@@ -71,7 +138,14 @@ public interface Serializer<T> {
    * @param object 変換対象オブジェクト
    * @return オブジェクトをJSON化した文字列、またはnull
    */
-  public byte[]serializeToBytes(T object);
+  public byte[]serializeToBytes(T object) {
+    if (object == null) return null;
+    try {
+      return serialize(object).getBytes(ENCODING);
+    } catch (Exception ex) {
+      throw new JsonException(ex);
+    }
+  }
 
   /**
    * {@link #serialize(Object)}と同じだが、結果の文字列をJavaコード文字列に変換する。
@@ -79,7 +153,17 @@ public interface Serializer<T> {
    * @param object 変換対象オブジェクト
    * @return Javaコード文字列
    */
-  public String serializeToJavaString(T object);
+  public String serializeToJavaString(T object) {
+    StringBuilder result = new StringBuilder();
+    String serialized = serialize(object);
+    result.append('"');
+    for (char c: serialized.toCharArray()) {
+      if (c == '"') result.append("\\");
+      result.append(c);
+    }
+    result.append('"');
+    return result.toString();
+  }
   
   /**
    * 指定されたJSON文字列を元のオブジェクトに変換する。オブジェクトはT型でなければいけない。
@@ -87,7 +171,23 @@ public interface Serializer<T> {
    * @param json JSON文字列
    * @return 復帰されたオブジェクト、あるいはnull
    */
-  public T deserialize(String json);
+  @SuppressWarnings("unchecked")
+  public T deserialize(String json) {
+    if (json == null) return null;
+    try {
+      return (T)gson.fromJson(json, topType.getType());
+    } catch (JsonClassNotFoundException ex) {
+      // 復帰時にクラスが見つからない場合
+      if (nullIfClassNotFound) return null;          
+      throw ex;
+    } catch (JsonException ex) {
+      // 上記以外のJSON例外
+      throw ex;
+    } catch (RuntimeException ex) {
+      // 上記以外のランタイム例外
+      throw new JsonException(ex);
+    }
+  }
 
   /**
    * 指定されたバイト配列をUTF-8文字列とし、それを元のオブジェクトに変換する。オブジェクトはT型でなければいけない。
@@ -95,7 +195,14 @@ public interface Serializer<T> {
    * @param bytes
    * @return
    */
-  public T deserializeFromBytes(byte[]bytes);
+  public T deserializeFromBytes(byte[]bytes) {
+    if (bytes == null) return null;
+    try {
+      return deserialize(new String(bytes, ENCODING));
+    } catch (Exception ex) {
+      throw new JsonException(ex);
+    }
+  }
   
   /**
    * 指定されたオブジェクトをJSON文字列に変換し、さらにGZIP圧縮した後のバイト配列を取得する。
@@ -104,7 +211,19 @@ public interface Serializer<T> {
    * @param object 変換対象オブジェクト
    * @return 直列化されたバイト配列
    */
-  public byte[]serializeGzip(T object);
+  public byte[] serializeGzip(T object) {
+    if (object == null) return null;
+    byte[]bytes = serializeToBytes(object);
+    try {
+      ByteArrayOutputStream bout = new ByteArrayOutputStream();
+      GZIPOutputStream gout = new GZIPOutputStream(bout);
+      gout.write(bytes);
+      gout.close();
+      return bout.toByteArray();
+    } catch (Exception ex) {
+      throw new JsonException(ex);
+    }
+  }
 
   /**
    * 指定されたGZIPバイト配列から元のオブジェクトを復帰する。オブジェクトはT型でなければいけない。
@@ -112,148 +231,78 @@ public interface Serializer<T> {
    * @param bytes GZIP圧縮されたJSON文字列
    * @return 復帰されたオブジェクト
    */
-  public T deserializeGzip(byte[]bytes);
+  public T deserializeGzip(byte[]bytes) {
+    if (bytes == null)
+      return null;
+    try {
+      ByteArrayInputStream bin = new ByteArrayInputStream(bytes);
+      GZIPInputStream gin = new GZIPInputStream(bin);
+      ByteArrayOutputStream bout = new ByteArrayOutputStream();
+      byte[]buffer = new byte[1024];
+      while (true) {
+        int size = gin.read(buffer);
+        if (size <= 0) break;
+        bout.write(buffer, 0, size);
+      }
+      bout.close();
+      return deserializeFromBytes(bout.toByteArray());
+    } catch (Exception ex) {
+      throw new JsonException(ex);
+    }
+  }
   
   /**
-   * {@link Serializer}の実装
-   * @author ysugimura
+   * {@link GsonBuilder}オブジェクトを作成し、このオブジェクト中に格納された情報をセットアップする。
+   * 
+   * <h2>enableComplexMapKeySerialization()</h2>
+   * <p>
+   * これを行わないと、マップのキーは必ずそのオブジェクトのtoString()の結果の文字列になってしまう。
+   * これはなぜかというと、JSONのマップのキーは単一の文字列でなければならないからのようだ。
+   * </p>
+   * <p>
+   * しかしこれでは、複雑なオブジェクトをキーとして使っている場合には、適切なtoString()を定義しないと
+   * いけないし（復帰方法は調べていない）、逆にenumにtoString()が定義されていると、適切なJSON化が
+   * できなくなる。
+   * ここでは、JSON文字列としての不適切さよりも、Javaオブジェクトの直列化・復帰を主眼にしているので、
+   * このオプションを指定する。
+   * </p>
+   * <h2>serializeNulls()</h2>
+   * <p>
+   * これを行わないと、値がnullのフィールドはフィールド自体が省略されてしまう。
+   * 以下のケースのaフィールドはこれでも問題が無いが、bのハッシュマップの値がnullの場合には、キーも
+   * 格納されなくなってしまう。
+   * </p>
+   * <pre>
+   * public static class Sample {
+   *   String a;
+   *   HashMap<Integer, String>b = new HashMap<Integer, String>();
+   * }
+   * </pre>
+   * <p>
+   * 例えば、以下のようなケースの場合、ハッシュマップの値がnullなのでキー自体も現れなくなってしまう。
+   * </p>
+   * <pre>
+   * Sample sample = new Sample();
+   * sample.b.put(123, null);
+   * </pre>
+   * <h2>serializeSpecialFloatingPointValues()</h2>
+   * <p>
+   * JSON自体の仕様ではNaNやInfiniteは存在しないが、これが無いと値が落ちてしまうためサポートする。
+   * </p>
    */
-  public static class Impl<T> implements Serializer<T> {
-        
-    public Impl() {}
-  
-    /** このシリアライザが直列化及び復帰を行う対象のクラス */
-    private TypeToken<T> topType;
+  protected static <T>GsonBuilder createGsonBuilder() {
     
-    /** Gson実行オブジェクト */
-    private Gson gson;
+    GsonBuilder builder = new GsonBuilder();
     
-    /** 復帰時にクラスが見つからない場合はnullを返す */
-    private boolean nullIfClassNotFound = true;
+    // ※上記説明を参照のこと
+    builder.enableComplexMapKeySerialization();
 
-    /**
-     * セットアップする
-     * @param topType
-     * @param gson
-     */
-    void setup(TypeToken<T> topType, Gson gson) {
-      this.topType = topType;
-      this.gson = gson;
-    }
-   
-    /**
-     * 復帰時にクラスが見つからない場合はnullを返す設定
-     * @param value 
-     */
-    public Serializer<T> setNullIfClassNotFound(boolean value) {
-      nullIfClassNotFound = value;
-      return this;
-    }
+    // ※上記説明を参照のこと。
+    builder.serializeNulls();
     
-    /** {@inheritDoc} */
-    @Override
-    public String serialize(T object) {
-      if (object == null) return null;
-      try {
-        return gson.toJson(object, topType.getType());
-      } catch (RuntimeException ex) {
-        throw new JsonException(ex);
-      }
-    }
-    
-    /** {@inheritDoc} */
-    @Override
-    public byte[]serializeToBytes(T object) {
-      if (object == null) return null;
-      try {
-        return serialize(object).getBytes(ENCODING);
-      } catch (Exception ex) {
-        throw new JsonException(ex);
-      }
-    }
+    // ※上記説明を参照のこと。
+    builder.serializeSpecialFloatingPointValues();
 
-    /** {@inheritDoc} */
-    public String serializeToJavaString(T object) {
-      StringBuilder result = new StringBuilder();
-      String serialized = serialize(object);
-      result.append('"');
-      for (char c: serialized.toCharArray()) {
-        if (c == '"') result.append("\\");
-        result.append(c);
-      }
-      result.append('"');
-      return result.toString();
-    }
-    
-    /** {@inheritDoc} */
-    @SuppressWarnings("unchecked")
-    @Override
-    public T deserialize(String json) {
-      if (json == null) return null;
-      try {
-        return (T)gson.fromJson(json, topType.getType());
-      } catch (JsonClassNotFoundException ex) {
-        // 復帰時にクラスが見つからない場合
-        if (nullIfClassNotFound) return null;          
-        throw ex;
-      } catch (JsonException ex) {
-        // 上記以外のJSON例外
-        throw ex;
-      } catch (RuntimeException ex) {
-        // 上記以外のランタイム例外
-        throw new JsonException(ex);
-      }
-    }
-    
-    @Override
-    public T deserializeFromBytes(byte[]bytes) {
-      if (bytes == null) return null;
-      try {
-        return deserialize(new String(bytes, ENCODING));
-      } catch (Exception ex) {
-        throw new JsonException(ex);
-      }
-    }
-    
-    /** JSONのエンコーディング */
-    private static final String ENCODING = "UTF-8";
-
-    /** {@inheritDoc} */
-    @Override
-    public byte[] serializeGzip(T object) {
-      if (object == null) return null;
-      byte[]bytes = serializeToBytes(object);
-      try {
-        ByteArrayOutputStream bout = new ByteArrayOutputStream();
-        GZIPOutputStream gout = new GZIPOutputStream(bout);
-        gout.write(bytes);
-        gout.close();
-        return bout.toByteArray();
-      } catch (Exception ex) {
-        throw new JsonException(ex);
-      }
-    }
-
-    /** {@inheritDoc} */
-    @Override
-    public T deserializeGzip(byte[]bytes) {
-      if (bytes == null)
-        return null;
-      try {
-        ByteArrayInputStream bin = new ByteArrayInputStream(bytes);
-        GZIPInputStream gin = new GZIPInputStream(bin);
-        ByteArrayOutputStream bout = new ByteArrayOutputStream();
-        byte[]buffer = new byte[1024];
-        while (true) {
-          int size = gin.read(buffer);
-          if (size <= 0) break;
-          bout.write(buffer, 0, size);
-        }
-        bout.close();
-        return deserializeFromBytes(bout.toByteArray());
-      } catch (Exception ex) {
-        throw new JsonException(ex);
-      }
-    }    
+    return builder;
   }
 }

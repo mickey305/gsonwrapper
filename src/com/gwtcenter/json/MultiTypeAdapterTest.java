@@ -5,22 +5,20 @@ import static org.junit.Assert.*;
 import org.junit.*;
 
 import com.google.gson.reflect.*;
-import com.google.inject.*;
 
 public class MultiTypeAdapterTest {
 
-  SerializerFactory factory;
+
   
   @Before
   public void before() {
-    Injector i = Guice.createInjector();
-    factory = i.getInstance(SerializerFactory.class);
+
   }
   
   @Test
   public void invalidTest() {
     try {
-      Serializer<Bar>serializer = factory.create(InvalidAdapter.INSTANCE);
+      Serializer<Bar>serializer = new Serializer<>(InvalidAdapter.INSTANCE);
       fail();
     } catch (Exception ex) {
       
@@ -35,7 +33,7 @@ public class MultiTypeAdapterTest {
   
   @Test
   public void test0() {
-    Serializer<Bar>serializer = factory.create(BarAdapter.INSTANCE);
+    Serializer<Bar>serializer = new Serializer<>(BarAdapter.INSTANCE);
     Bar in = new BarTwo();
     String json = serializer.serialize(in);
     //PrintJsonForTest.printJson(json);
@@ -47,7 +45,7 @@ public class MultiTypeAdapterTest {
   
   @Test
   public void test1() {
-    Serializer<Foo>serializer = factory.create(FooAdapter.INSTANCE);
+    Serializer<Foo>serializer = new Serializer<>(FooAdapter.INSTANCE);
     Foo in = new FooTwo();
     String json = serializer.serialize(in);
     //PrintJsonForTest.printJson(json);    
@@ -60,7 +58,7 @@ public class MultiTypeAdapterTest {
   //@Test
   public void test1_1() {
     String json = "{\"T\":\"FooFour\",\"D\":{\"two\":2}}";
-    Serializer<Foo>serializer = factory.create(FooAdapter.INSTANCE);
+    Serializer<Foo>serializer = new Serializer<Foo>(FooAdapter.INSTANCE);
     
     assertNull(serializer.deserialize(json));
     
@@ -74,7 +72,7 @@ public class MultiTypeAdapterTest {
   
   @Test 
   public void 抽象クラスが入れ子になっているケース() {
-    Serializer<Foo>serializer = factory.create(FooAdapter.INSTANCE);
+    Serializer<Foo>serializer = new Serializer<Foo>(FooAdapter.INSTANCE);
     Foo in = new FooThree(new BarTwo());
     String json = serializer.serialize(in);
     //PrintJsonForTest.printJson(json);

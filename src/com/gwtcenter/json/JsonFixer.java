@@ -2,7 +2,6 @@ package com.gwtcenter.json;
 
 import java.util.*;
 
-import com.google.inject.*;
 import com.gwtcenter.json.Json.*;
 
 
@@ -17,7 +16,7 @@ import com.gwtcenter.json.Json.*;
  * </p>
  * @author ysugimura
  */
-@Singleton
+
 public class JsonFixer {
   /**
    * 修正ノード
@@ -130,10 +129,8 @@ public class JsonFixer {
   //
   ////////////////////////////////////////////////////////////////////////////
   
-  @Inject private Json.Factory jsonFactory;
-
-  public String fix(String json, Node node) {
-    return fix((JElement) jsonFactory.get(json), node);
+  public static String fix(String json, Node node) {
+    return fix((JElement)Json.get(json), node);
   }
 
   /**
@@ -142,11 +139,11 @@ public class JsonFixer {
    * @param node
    * @return
    */
-  public String fix(JElement element, FixRoot root) {
+  public static String fix(JElement element, FixRoot root) {
     return fix(element, root);
   }
   
-  private String fix(JElement parent, Node node) {
+  private static String fix(JElement parent, Node node) {
     // ystem.out.println("parent:" + element.getJson());
     if (!node.hasSubMap()) {
       return parent.getJson();
@@ -161,7 +158,7 @@ public class JsonFixer {
     return fixObject((JObject)parent, node);
   }
 
-  private String fixObject(JObject object, Node node) {
+  private static String fixObject(JObject object, Node node) {
     Stocker s = new Stocker();
     for (Map.Entry<String, JElement> e : object.entrySet()) {
       String childName = e.getKey();
@@ -172,7 +169,7 @@ public class JsonFixer {
     return s.asObjectString();    
   }
   
-  private void fixChild(Stocker s, String childName, JElement childElement, Node subNode) {        
+  private static void fixChild(Stocker s, String childName, JElement childElement, Node subNode) {        
     if (subNode == null) {
       s.addItemJson(childName, childElement.getJson());
       return;
@@ -180,7 +177,7 @@ public class JsonFixer {
     fixMap.get(subNode.getClass()).fix(s, childName, childElement, subNode);
   }
   
-  private Map<Class<? extends Node>, Executer>fixMap = new HashMap<Class<? extends Node>, Executer>();
+  private static Map<Class<? extends Node>, Executer>fixMap = new HashMap<Class<? extends Node>, Executer>();
   {
     fixMap.put(FixNone.class,  new FixNoneExecuter());
     fixMap.put(DropEmptyArray.class, new DropEmptyArrayExecuter());
@@ -189,16 +186,16 @@ public class JsonFixer {
     fixMap.put(ChangeFieldName.class,  new ChangeFieldNameExecuter());
   }
   
-  public class Executer {
+  public static class Executer {
     public void fix(Stocker s, String childName, JElement childElement, Node subNode) {
-      s.addItemJson(childName, JsonFixer.this.fix(childElement, subNode));     
+      s.addItemJson(childName, JsonFixer.fix(childElement, subNode));     
     }
   }
   
-  class FixNoneExecuter extends Executer {
+  static class FixNoneExecuter extends Executer {
   }
   
-  class DropEmptyArrayExecuter extends Executer {
+  static class DropEmptyArrayExecuter extends Executer {
     public void fix(Stocker s, String childName, JElement childElement, Node subNode) {
       // このノードを無視する
       if (childElement instanceof JArray && ((JArray)childElement).size() == 0)
@@ -207,7 +204,7 @@ public class JsonFixer {
     }
   }
   
-  class DropPrimitiveExecuter extends Executer {
+  static class DropPrimitiveExecuter extends Executer {
     public void fix(Stocker s, String childName, JElement childElement, Node subNode) {
       // このノードを無視する
       if (childElement instanceof JPrimitive)
@@ -216,20 +213,20 @@ public class JsonFixer {
     }
   }
 
-  class ForceArrayExecuter extends Executer {
+  static class ForceArrayExecuter extends Executer {
     public void fix(Stocker s, String childName, JElement childElement, Node subNode) {
       if (!(childElement instanceof JArray))
-        s.addItemJson(childName, "[" + JsonFixer.this.fix(childElement, subNode) + "]");
+        s.addItemJson(childName, "[" + JsonFixer.fix(childElement, subNode) + "]");
       else
         super.fix(s, childName, childElement, subNode);  
     }
   }
   
-  class ChangeFieldNameExecuter extends Executer {
+  static class ChangeFieldNameExecuter extends Executer {
     public void fix(Stocker s, String childName, JElement childElement, Node subNode) {
       ChangeFieldName node = (ChangeFieldName)subNode;
       assert childName.equals(node.name);
-      s.addItemJson(node.to, JsonFixer.this.fix(childElement, subNode));     
+      s.addItemJson(node.to, JsonFixer.fix(childElement, subNode));     
     }
   }
 
@@ -239,7 +236,7 @@ public class JsonFixer {
    * @param node
    * @return
    */
-  private String fixArray(JArray array, Node node) {
+  private static String fixArray(JArray array, Node node) {
     Stocker s = new Stocker();
     array.forEach(element-> {
       s.addJson(fix(element, node));

@@ -6,11 +6,9 @@ import java.util.*;
 
 import org.junit.*;
 
-import com.google.inject.*;
-
 /**
  * nullがシリアライズされることのテスト
- * 特にHashMapの値値がシリアライズされないと困る。
+ * 特にHashMapの値がシリアライズされないと困る。
  * @author ysugimura
  */
 public class SerializeNullsTest {
@@ -19,8 +17,7 @@ public class SerializeNullsTest {
   
   @Before
   public void before() {
-    Injector i = Guice.createInjector();
-    serializer = i.getInstance(SerializerFactory.class).create(new BaseAdapter<Sample>(Sample.class));
+    serializer = new Serializer<>(new BaseAdapter<Sample>(Sample.class));
   }
   
   @Test

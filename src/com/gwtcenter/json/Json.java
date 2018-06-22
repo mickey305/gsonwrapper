@@ -3,20 +3,15 @@ package com.gwtcenter.json;
 import java.util.*;
 
 import com.google.gson.*;
-import com.google.inject.*;
 
-@Singleton
 public class Json {
 
-  @Singleton
-  public static class Factory {
-    @Inject private Provider<Json>provider;
-    public <T extends JElement>T get(String jsonString) {      
-      Gson gson = new Gson();
-      Json json = provider.get();
-      return json.wrap(gson.fromJson(jsonString, JsonObject.class));      
-    }
+  
+  public static <T extends JElement>T get(String jsonString) {      
+    Gson gson = new Gson();
+    return wrap(gson.fromJson(jsonString, JsonObject.class));      
   }
+  
   
   public static enum JType {
     OBJECT,
@@ -25,7 +20,8 @@ public class Json {
     NULL;
   }
   
-  public <T extends JElement>T wrap(JsonElement element) {
+  @SuppressWarnings("unchecked")
+  public static  <T extends JElement>T wrap(JsonElement element) {
     if (element instanceof JsonObject) {
       return (T)new JObjectImpl((JsonObject)element);
     }
@@ -86,7 +82,7 @@ public class Json {
     
   }
   
-  public class JElementImpl<T extends JsonElement> implements JElement {
+  public static class JElementImpl<T extends JsonElement> implements JElement {
     private JType type;
     protected T element;
     private JElementImpl(JType type, T element) {
@@ -116,7 +112,7 @@ public class Json {
     }
   }
   
-  public class JObjectImpl extends JElementImpl<JsonObject> implements JObject {
+  public static class JObjectImpl extends JElementImpl<JsonObject> implements JObject {
     private Map<String, JElement>map;
     private JObjectImpl(JsonObject object) {
       super(JType.OBJECT, object);
@@ -136,7 +132,7 @@ public class Json {
     }
   }
   
-  public class JArrayImpl extends JElementImpl<JsonArray> implements JArray {
+  public static class JArrayImpl extends JElementImpl<JsonArray> implements JArray {
     private List<JElement>list;
     private JArrayImpl(JsonArray array) {
       super(JType.ARRAY, array);
@@ -158,7 +154,7 @@ public class Json {
 
   }
   
-  public class JPrimitiveImpl extends JElementImpl<JsonPrimitive> implements JPrimitive  {
+  public static class JPrimitiveImpl extends JElementImpl<JsonPrimitive> implements JPrimitive  {
     private JPrimitiveImpl(JsonPrimitive primitive) {
       super(JType.PRIMITIVE, primitive);
     }
@@ -182,7 +178,7 @@ public class Json {
     }
   }
   
-  public class JNullImpl extends JElementImpl<JsonNull> implements JNull {
+  public static class JNullImpl extends JElementImpl<JsonNull> implements JNull {
     private JNullImpl(JsonNull n) {
       super(JType.NULL, n);
     }

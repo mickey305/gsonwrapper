@@ -4,25 +4,22 @@ import static org.junit.Assert.*;
 
 import org.junit.*;
 
-import com.google.inject.*;
 import com.gwtcenter.json.JsonFixer.*;
 
 
 public class JsonFixerTest {
 
-  JsonFixer fixer;
   
   @Before
   public void before() {
-    Injector i = Guice.createInjector();
-    fixer = i.getInstance(JsonFixer.class);
+
   }
   
   @Test
   public void toArray() {
     String input = toDouble(
         "{'orders':{'commodities':{'commodity':{'name':'sample'}}}}");
-    String fixed = fixer.fix(
+    String fixed = JsonFixer.fix(
       input,
       new FixRoot(
         new FixNone("orders", 
@@ -43,7 +40,7 @@ public class JsonFixerTest {
   public void asIs() {
     String input = toDouble(
         "{'orders':{'commodities':{'commodity':[{'name':'sample'},{'name':'sample'}]}}}");
-    String fixed = fixer.fix(
+    String fixed =  JsonFixer.fix(
       input,
       new FixRoot(
         new FixNone("orders", 
@@ -67,7 +64,7 @@ public class JsonFixerTest {
       "],\n" +
       "'modified_date': '2016'\n" +
     "}");
-    String fixed = fixer.fix(
+    String fixed =  JsonFixer.fix(
         input,
         new FixRoot(
           new DropEmptyArray("option")
@@ -80,7 +77,7 @@ public class JsonFixerTest {
   @Test
   public void dropEmptyArray2() {
     String input = toDouble("{'option': []}");
-    String fixed = fixer.fix(
+    String fixed =  JsonFixer.fix(
         input,
         new FixRoot(
           new DropEmptyArray("option")
@@ -93,7 +90,7 @@ public class JsonFixerTest {
   public void changeFieldName() {
     String input = toDouble(
         "{'orders':{'commodities':{'commodity':{'name':'sample'}}}}");
-    String fixed = fixer.fix(
+    String fixed =  JsonFixer.fix(
       input,
       new FixRoot(
         new FixNone("orders", 

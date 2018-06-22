@@ -7,7 +7,6 @@ import java.util.*;
 import org.junit.*;
 
 import com.google.gson.reflect.*;
-import com.google.inject.*;
 
 /**
  * 直列化及び復帰のテスト
@@ -15,20 +14,14 @@ import com.google.inject.*;
  */
 public class SerializerTest {
 
-  private SerializerFactory sFactory;
-  
-  @Before
-  public void before() {
-    Injector i = Guice.createInjector();
-    sFactory = i.getInstance(SerializerFactory.class);    
-  }
+
   
   /**
    * 抽象クラスFooを直列化する。実際にはFooの下位クラスFooOneが直列化される。
    */
   @Test
   public void トップレベルの抽象クラス() {
-    Serializer<Foo>serializer = sFactory.create(FooAdapter.INSTANCE);
+    Serializer<Foo>serializer = new Serializer<>(FooAdapter.INSTANCE);
     Foo in = new FooOne();
     String json = serializer.serialize(in);
     //PrintJsonForTest.printJson(json);
@@ -40,7 +33,7 @@ public class SerializerTest {
   
   @Test
   public void トップレベルの抽象クラスJava文字列化() {
-    Serializer<Foo>serializer = sFactory.create(FooAdapter.INSTANCE);
+    Serializer<Foo>serializer = new Serializer<Foo>(FooAdapter.INSTANCE);
     Foo in = new FooOne();
     String json = serializer.serializeToJavaString(in);
     assertEquals("\"{\\\"T\\\":\\\"FooOne\\\",\\\"D\\\":{\\\"one\\\":1}}\"", json);
@@ -48,7 +41,7 @@ public class SerializerTest {
   
   @Test
   public void トップレベルの抽象クラス_gzip() {
-    Serializer<Foo>serializer = sFactory.create(FooAdapter.INSTANCE);
+    Serializer<Foo>serializer = new Serializer<Foo>(FooAdapter.INSTANCE);
     Foo in = new FooOne();
     Foo out = serializer.deserializeGzip(serializer.serializeGzip(in));
     assertTrue(out instanceof FooOne);
@@ -61,7 +54,7 @@ public class SerializerTest {
    */
   @Test
   public void 様々なオブジェクトを含むオブジェクト() {
-    Serializer<Various> serializer = sFactory.create(VariousAdapter.INSTANCE);
+    Serializer<Various> serializer = new Serializer<>(VariousAdapter.INSTANCE);
     
     Various in = new Various(123, "abc", new FooOne());
     String json = serializer.serialize(in);
@@ -76,7 +69,7 @@ public class SerializerTest {
   
   @Test
   public void 様々なオブジェクトを含むオブジェクト_gzip() {
-    Serializer<Various> serializer = sFactory.create(VariousAdapter.INSTANCE);    
+    Serializer<Various> serializer = new Serializer<>(VariousAdapter.INSTANCE);    
     Various in = new Various(123, "abc", new FooOne());
     Various out = serializer.deserializeGzip(serializer.serializeGzip(in));
     assertEquals(123, out.i);
@@ -90,7 +83,7 @@ public class SerializerTest {
   @Test
   public void トップレベルのジェネリックスリスト() {
     
-    Serializer<ArrayList<Various>> serializer = sFactory.create(
+    Serializer<ArrayList<Various>> serializer = new Serializer<>(
         VariousArrayListAdapter.INSTANCE);
 
     ArrayList<Various>in = new ArrayList<Various>();
@@ -112,7 +105,7 @@ public class SerializerTest {
   @Test
   public void トップレベルのジェネリックスリスト_gzip() {
     
-    Serializer<ArrayList<Various>> serializer = sFactory.create(
+    Serializer<ArrayList<Various>> serializer = new Serializer<>(
         VariousArrayListAdapter.INSTANCE);
 
     ArrayList<Various>in = new ArrayList<Various>();
@@ -136,7 +129,7 @@ public class SerializerTest {
     in.put(new Various(2, "b", new FooTwo()), "two");
      
     Serializer<HashMap<Various, String>>serializer = 
-        sFactory.create(VariousHashMapAdapter.INSTANCE);
+        new Serializer<>(VariousHashMapAdapter.INSTANCE);
     String json = serializer.serialize(in);
     
     //PrintJsonForTest.printJson(json);    
@@ -155,7 +148,7 @@ public class SerializerTest {
     in.put(new Various(2, "b", new FooTwo()), "two");
      
     Serializer<HashMap<Various, String>>serializer = 
-        sFactory.create(VariousHashMapAdapter.INSTANCE);
+        new Serializer<>(VariousHashMapAdapter.INSTANCE);
     HashMap<Various, String>out = serializer.deserializeGzip(serializer.serializeGzip(in));
     assertEquals("one", out.get(new Various(1, "a", new FooOne())));
     assertEquals("two", out.get(new Various(2, "b", new FooTwo())));
@@ -163,7 +156,7 @@ public class SerializerTest {
   
   @Test
   public void nullの入出力() {
-    Serializer<Foo> serializer = sFactory.create(FooAdapter.INSTANCE);   
+    Serializer<Foo> serializer = new Serializer<>(FooAdapter.INSTANCE);   
     assertNull(serializer.serialize(null));
     assertNull(serializer.deserialize(null));
     assertNull(serializer.serializeGzip(null));
@@ -172,7 +165,7 @@ public class SerializerTest {
   
   @Test
   public void バイナリテスト1() {
-    Serializer<Binary>serializer = sFactory.create(Binary.class);
+    Serializer<Binary>serializer = new Serializer<>(Binary.class);
     Binary b = new Binary();
     b.b = new byte[] { 1, 2, 127, -125 };
     String json = serializer.serialize(b);    
@@ -181,7 +174,7 @@ public class SerializerTest {
   
   @Test
   public void バイナリテスト2() {
-    Serializer<byte[]>serializer = sFactory.create(byte[].class);
+    Serializer<byte[]>serializer = new Serializer<>(byte[].class);
     byte[]b = new byte[] { 1, 2, 127, -125 };
     String json = serializer.serialize(b);    
     assertEquals("[1,2,127,-125]", json);

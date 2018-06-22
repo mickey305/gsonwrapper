@@ -7,7 +7,7 @@ import java.util.*;
 import org.junit.*;
 
 import com.google.gson.*;
-import com.google.inject.*;
+
 
 /**
  * このシステムでは{@link GsonBuilder}に対してenableComplexMapKeySerialization()
@@ -21,10 +21,8 @@ public class EnableComplexMapKeySerializationTest {
   Serializer<TheObject>serializer;
   
   @Before
-  public void before() {  
-    Injector i = Guice.createInjector();
-    SerializerFactory factory = i.getInstance(SerializerFactory.class);
-    serializer = factory.create(TheObjectAdapter.INSTANCE);
+  public void before() { 
+    serializer = new Serializer<TheObject>(TheObjectAdapter.INSTANCE);
   }
   
   

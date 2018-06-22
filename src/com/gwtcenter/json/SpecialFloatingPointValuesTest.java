@@ -4,16 +4,13 @@ import static org.junit.Assert.*;
 
 import org.junit.*;
 
-import com.google.inject.*;
-
 public class SpecialFloatingPointValuesTest {
 
   Serializer<Sample> serializer;
 
   @Before
   public void before() {
-    Injector i = Guice.createInjector();
-    serializer = i.getInstance(SerializerFactory.class).create(
+    serializer = new Serializer<>(
         new BaseAdapter<Sample>(Sample.class));
   }
 

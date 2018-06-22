@@ -64,11 +64,6 @@ public class  AbstractAdapter<T> {
     return targetType;
   }
   
-  @Deprecated
-  public void add(AbstractAdapter<?> subAdapter) {    
-    addSubAdapter(subAdapter);
-  }
-  
   /**
    * サブアダプタを追加する。
    * <p>

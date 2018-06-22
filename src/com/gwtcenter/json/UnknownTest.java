@@ -1,13 +1,13 @@
 package com.gwtcenter.json;
 
+import static org.junit.Assert.*;
+
 import java.util.*;
 
 import org.junit.*;
-import static org.junit.Assert.*;
 
 import com.google.gson.*;
 import com.google.gson.reflect.*;
-import com.google.inject.*;
 
 /**
  * フィールドが多すぎるので、Javaオブジェクトを割り当てるのではなく、マップで取得する例。
@@ -15,13 +15,6 @@ import com.google.inject.*;
  */
 public class UnknownTest {
 
-  SerializerFactory sf;
-  
-  @Before
-  public void before() {
-    Injector i = Guice.createInjector();
-    sf = i.getInstance(SerializerFactory.class);
-  }
 
   /**
    * Serializerを使う場合、ただしこの場合は指定された型しか許されない。例えば、k1やk2の値として
@@ -29,10 +22,9 @@ public class UnknownTest {
    */
 //  @Test
   public void testWithSerializer() {
-    Injector i = Guice.createInjector();
-    SerializerFactory sf = i.getInstance(SerializerFactory.class);
+
     
-    Serializer<Foo>serializer = sf.create(new FooAdapter());    
+    Serializer<Foo>serializer = new Serializer<>(new FooAdapter());    
     Foo object = serializer.deserialize(
         "{'bar':{'mapList':[{'k1':'apple','k2':'orange'},{'k1':'lemmon','k2':'banana'}]}}");
 
