@@ -48,7 +48,6 @@ import com.google.gson.reflect.*;
  */
 public class Serializer<T> {
 
-  
   /** このシリアライザが直列化及び復帰を行う対象のクラス */
   private TypeToken<T> topType;
   
@@ -135,7 +134,7 @@ public class Serializer<T> {
   public byte[]serializeToBytes(T object) {
     if (object == null) return null;
     try {
-      return serialize(object).getBytes(Consts.ENCODING);
+      return serialize(object).getBytes(Settings.ENCODING);
     } catch (Exception ex) {
       throw new JsonException(ex);
     }
@@ -192,7 +191,7 @@ public class Serializer<T> {
   public T deserializeFromBytes(byte[]bytes) {
     if (bytes == null) return null;
     try {
-      return deserialize(new String(bytes, Consts.ENCODING));
+      return deserialize(new String(bytes, Settings.ENCODING));
     } catch (Exception ex) {
       throw new JsonException(ex);
     }
@@ -244,58 +243,26 @@ public class Serializer<T> {
       throw new JsonException(ex);
     }
   }
-  
+
   /**
-   * {@link GsonBuilder}オブジェクトを作成し、このオブジェクト中に格納された情報をセットアップする。
-   * 
-   * <h2>enableComplexMapKeySerialization()</h2>
-   * <p>
-   * これを行わないと、マップのキーは必ずそのオブジェクトのtoString()の結果の文字列になってしまう。
-   * これはなぜかというと、JSONのマップのキーは単一の文字列でなければならないからのようだ。
-   * </p>
-   * <p>
-   * しかしこれでは、複雑なオブジェクトをキーとして使っている場合には、適切なtoString()を定義しないと
-   * いけないし（復帰方法は調べていない）、逆にenumにtoString()が定義されていると、適切なJSON化が
-   * できなくなる。
-   * ここでは、JSON文字列としての不適切さよりも、Javaオブジェクトの直列化・復帰を主眼にしているので、
-   * このオプションを指定する。
-   * </p>
-   * <h2>serializeNulls()</h2>
-   * <p>
-   * これを行わないと、値がnullのフィールドはフィールド自体が省略されてしまう。
-   * 以下のケースのaフィールドはこれでも問題が無いが、bのハッシュマップの値がnullの場合には、キーも
-   * 格納されなくなってしまう。
-   * </p>
-   * <pre>
-   * public static class Sample {
-   *   String a;
-   *   HashMap<Integer, String>b = new HashMap<Integer, String>();
-   * }
-   * </pre>
-   * <p>
-   * 例えば、以下のようなケースの場合、ハッシュマップの値がnullなのでキー自体も現れなくなってしまう。
-   * </p>
-   * <pre>
-   * Sample sample = new Sample();
-   * sample.b.put(123, null);
-   * </pre>
-   * <h2>serializeSpecialFloatingPointValues()</h2>
-   * <p>
-   * JSON自体の仕様ではNaNやInfiniteは存在しないが、これが無いと値が落ちてしまうためサポートする。
-   * </p>
+   * {@link GsonBuilder}を作成する。各フラグについては{@link Settings}を参照のこと。
+   * @return　{@link GsonBuilder}
    */
   protected static <T>GsonBuilder createGsonBuilder() {
     
     GsonBuilder builder = new GsonBuilder();
     
-    // ※上記説明を参照のこと
-    builder.enableComplexMapKeySerialization();
-
-    // ※上記説明を参照のこと。
-    builder.serializeNulls();
+    if (Settings.ENABLE_COMPLEX_MAP_KEY_SERIALIZATION) {
+      builder.enableComplexMapKeySerialization();
+    }
     
-    // ※上記説明を参照のこと。
-    builder.serializeSpecialFloatingPointValues();
+    if (Settings.SERIALIZE_NULLS) {
+      builder.serializeNulls();
+    }
+    
+    if (Settings.SERIALIZE_SPECIAL_FLOATING_POINT_VALUES) {
+      builder.serializeSpecialFloatingPointValues();
+    }
 
     return builder;
   }

@@ -109,10 +109,10 @@ class MultiTypeAdapterFactory<T> implements TypeAdapterFactory {
       writer.beginObject();
 
       // 型フィールドを書き込み
-      writer.name(Consts.MULTITYPE_TYPE_MARKER).value(typeName);
+      writer.name(Settings.MULTITYPE_TYPE_MARKER).value(typeName);
 
       // データフィールドを書き込み
-      writer.name(Consts.MULTITYPE_DATA_MARKER);
+      writer.name(Settings.MULTITYPE_DATA_MARKER);
       env.elementAdapter.write(writer, tree);
 
       // オブジェクト書き込み終了
@@ -135,13 +135,13 @@ class MultiTypeAdapterFactory<T> implements TypeAdapterFactory {
 
       // 型フィールド、データフィールドを読み出し
       String typeField = reader.nextName();
-      if (!typeField.equals(Consts.MULTITYPE_TYPE_MARKER)) {
+      if (!typeField.equals(Settings.MULTITYPE_TYPE_MARKER)) {
         // assertにしてしまうと復旧ができないので例外にする
         throw new JsonException("Invalid TYPE FIELD Marker in MultiTypeAdapter:" + typeField);
       }
       String typeName = reader.nextString();
       String dataField = reader.nextName();
-      if (!dataField.equals(Consts.MULTITYPE_DATA_MARKER)) {
+      if (!dataField.equals(Settings.MULTITYPE_DATA_MARKER)) {
         // assertにしてしまうと復旧ができないので例外にする
         throw new JsonException("Invalid DATA FIELD Marker in MultiTypeAdapter:" + dataField);
       }

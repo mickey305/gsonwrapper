@@ -1,11 +1,9 @@
 package com.cm55.gson;
 
-import java.io.*;
 import java.util.*;
 
 import com.google.gson.*;
 import com.google.gson.reflect.*;
-import com.google.gson.stream.*;
 
 /**
  * JSON化するオブジェクト中のフィールドに格納されるタイプが単一でないときがある。
