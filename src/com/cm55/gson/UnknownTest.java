@@ -46,10 +46,10 @@ public class UnknownTest {
   }
 
 
-  static Handler<Bar>BAR_ADAPTER = new HandlerBuilder<>(Bar.class).addSubHandler(
+  static Handler<Bar>BAR_HANDLER = new HandlerBuilder<>(Bar.class).addSubHandler(
       new HandlerBuilder<List<Map<String, String>>>(new TypeToken<List<Map<String, String>>>(){}).build()
    ).build();
-  static Handler<Foo>FOO_ADAPTER = new HandlerBuilder<>(Foo.class).addSubHandler(BAR_ADAPTER).build();
+  static Handler<Foo>FOO_HANDLER = new HandlerBuilder<>(Foo.class).addSubHandler(BAR_HANDLER).build();
 
   
   /**

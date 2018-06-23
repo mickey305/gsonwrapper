@@ -22,23 +22,23 @@
  * <pre>
  * public static class Foo {
  * }
- * public static class FooAdapter extends AbstractAdapter<Foo> {
- *   public static final FooAdapter INSTANCE = new FooAdapter();
- *   public FooAdapter() {
+ * public static class FooHandler extends AbstractHandler<Foo> {
+ *   public static final FooHandler INSTANCE = new FooHandler();
+ *   public FooHandler() {
  *     super(Foo.class);
  *   }
  * }
  * ...
  * public void execute() {
- *   Serializer<Foo>serializer = new Serializer(FooAdapter.INSTANCE);
+ *   Serializer<Foo>serializer = new Serializer(FooHandler.INSTANCE);
  *   Foo in = new Foo();
  *   String json = serializer.serialize(in);
  *   Foo out = serializer.deserialize(json);
  * }
  * </pre>
  * <p>
- * すべてのアダプタはreadOnlyのため、例のように単一のオブジェクトを使いまわしてよい。
- * （トップレベルのFoo用の）アダプタのインスタンスを指定してシリアライザを作成する。
+ * すべてのハンドラはreadOnlyのため、例のように単一のオブジェクトを使いまわしてよい。
+ * （トップレベルのFoo用の）ハンドラのインスタンスを指定してシリアライザを作成する。
  * </p>
  * <p>
  * 当然ながら、Fooクラスの中には様々なオブジェクトが存在するが、以下に述べる事情の無い限り何も指定する
@@ -52,9 +52,9 @@
  * public static abstract class Bar {}
  * public static class Bar1 extends Bar {}
  * public static class Bar2 extends Bar {}
- * public static class BarAdapter extends MultiTypeAdapter<Bar> {
- *   public static final BarAdapter INSTANCE = new BarAdapter();
- *   public BarAdapter() {
+ * public static class BarHandler extends MultiTypeHandler<Bar> {
+ *   public static final BarHandler INSTANCE = new BarHandler();
+ *   public BarHandler() {
  *     super(Bar.class);
  *     add(Bar1.class);
  *     add(Bar2.class);
@@ -68,11 +68,11 @@
  * public static class Foo {
  *   Bar bar;
  * }
- * public static class FooAdapter extends AbstractAdapter<Foo> {
- *   public static final FooAdapter INSTANCE = new FooAdapter();
+ * public static class FooHandler extends AbstractHandler<Foo> {
+ *   public static final FooHandler INSTANCE = new FooHandler();
  *   public Foo() {
  *     super(Foo.class);
- *     add(BarAdapter.INSTANCE);
+ *     add(BarHandler.INSTANCE);
  *   }
  * }
  * </pre>
@@ -83,11 +83,11 @@
  * 必要がある。例えば、トップレベルがArrayList<Foo>型の場合には、以下のようにする。
  * </p>
  * <pre>
- * public static class FooArrayListAdapter extends AbstractAdapter<ArrayList<Foo>> {
- *   public static FooArrayListAdapter INSTANCE = new FooArrayListAdapter();
- *   public FooArrayListAdapter() {
+ * public static class FooArrayListHandler extends AbstractHandler<ArrayList<Foo>> {
+ *   public static FooArrayListHandler INSTANCE = new FooArrayListHandler();
+ *   public FooArrayListHandler() {
  *     super(new TypeToken<ArrayList<Foo>>() {});
- *     add(FooAdapter.INSTANCE);
+ *     add(FooHandler.INSTANCE);
  *   }
  * }
  * </pre>

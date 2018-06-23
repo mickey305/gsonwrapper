@@ -46,7 +46,7 @@ public class SerializerTest {
    */
   @Test
   public void トップレベルの抽象クラス() {
-    Serializer<Foo>serializer = new Serializer<>(FooAdapter.INSTANCE);
+    Serializer<Foo>serializer = new Serializer<>(FooHandler.INSTANCE);
     Foo in = new FooOne();
     String json = serializer.serialize(in);
     //PrintJsonForTest.printJson(json);
@@ -58,7 +58,7 @@ public class SerializerTest {
   
   @Test
   public void トップレベルの抽象クラスJava文字列化() {
-    Serializer<Foo>serializer = new Serializer<Foo>(FooAdapter.INSTANCE);
+    Serializer<Foo>serializer = new Serializer<Foo>(FooHandler.INSTANCE);
     Foo in = new FooOne();
     String json = serializer.serializeToJavaString(in);
     assertEquals("\"{\\\"T\\\":\\\"FooOne\\\",\\\"D\\\":{\\\"one\\\":1}}\"", json);
@@ -66,7 +66,7 @@ public class SerializerTest {
   
   @Test
   public void トップレベルの抽象クラス_gzip() {
-    Serializer<Foo>serializer = new Serializer<Foo>(FooAdapter.INSTANCE);
+    Serializer<Foo>serializer = new Serializer<Foo>(FooHandler.INSTANCE);
     Foo in = new FooOne();
     Foo out = serializer.deserializeGzip(serializer.serializeGzip(in));
     assertTrue(out instanceof FooOne);
@@ -79,7 +79,7 @@ public class SerializerTest {
    */
   @Test
   public void 様々なオブジェクトを含むオブジェクト() {
-    Serializer<Various> serializer = new Serializer<>(VariousAdapter.INSTANCE);
+    Serializer<Various> serializer = new Serializer<>(VariousHandler.INSTANCE);
     
     Various in = new Various(123, "abc", new FooOne());
     String json = serializer.serialize(in);
@@ -94,7 +94,7 @@ public class SerializerTest {
   
   @Test
   public void 様々なオブジェクトを含むオブジェクト_gzip() {
-    Serializer<Various> serializer = new Serializer<>(VariousAdapter.INSTANCE);    
+    Serializer<Various> serializer = new Serializer<>(VariousHandler.INSTANCE);    
     Various in = new Various(123, "abc", new FooOne());
     Various out = serializer.deserializeGzip(serializer.serializeGzip(in));
     assertEquals(123, out.i);
@@ -109,7 +109,7 @@ public class SerializerTest {
   public void トップレベルのジェネリックスリスト() {
     
     Serializer<ArrayList<Various>> serializer = new Serializer<>(
-        VariousArrayListAdapter.INSTANCE);
+        VariousArrayListHandler.INSTANCE);
 
     ArrayList<Various>in = new ArrayList<Various>();
     Various in0 = new Various(123, "abc", new FooOne());
@@ -131,7 +131,7 @@ public class SerializerTest {
   public void トップレベルのジェネリックスリスト_gzip() {
     
     Serializer<ArrayList<Various>> serializer = new Serializer<>(
-        VariousArrayListAdapter.INSTANCE);
+        VariousArrayListHandler.INSTANCE);
 
     ArrayList<Various>in = new ArrayList<Various>();
     Various in0 = new Various(123, "abc", new FooOne());
@@ -154,7 +154,7 @@ public class SerializerTest {
     in.put(new Various(2, "b", new FooTwo()), "two");
      
     Serializer<HashMap<Various, String>>serializer = 
-        new Serializer<>(VariousHashMapAdapter.INSTANCE);
+        new Serializer<>(VariousHashMapHandler.INSTANCE);
     String json = serializer.serialize(in);
     
     //PrintJsonForTest.printJson(json);    
@@ -173,7 +173,7 @@ public class SerializerTest {
     in.put(new Various(2, "b", new FooTwo()), "two");
      
     Serializer<HashMap<Various, String>>serializer = 
-        new Serializer<>(VariousHashMapAdapter.INSTANCE);
+        new Serializer<>(VariousHashMapHandler.INSTANCE);
     HashMap<Various, String>out = serializer.deserializeGzip(serializer.serializeGzip(in));
     assertEquals("one", out.get(new Various(1, "a", new FooOne())));
     assertEquals("two", out.get(new Various(2, "b", new FooTwo())));
@@ -181,7 +181,7 @@ public class SerializerTest {
   
   @Test
   public void nullの入出力() {
-    Serializer<Foo> serializer = new Serializer<>(FooAdapter.INSTANCE);   
+    Serializer<Foo> serializer = new Serializer<>(FooHandler.INSTANCE);   
     assertNull(serializer.serialize(null));
     assertNull(serializer.deserialize(null));
     assertNull(serializer.serializeGzip(null));
@@ -212,9 +212,9 @@ public class SerializerTest {
    * @author ysugimura
    *
    */
-  public static class VariousHashMapAdapter  {
+  public static class VariousHashMapHandler  {
     public static  Handler<HashMap<Various, String>> INSTANCE = 
-        new HandlerBuilder<>(new TypeToken<HashMap<Various, String>>() {}).addSubHandler(FooAdapter.INSTANCE).build();
+        new HandlerBuilder<>(new TypeToken<HashMap<Various, String>>() {}).addSubHandler(FooHandler.INSTANCE).build();
   }
   
   // ArrayList of Various /////////////////////////////////////////////////////
@@ -224,10 +224,10 @@ public class SerializerTest {
    * @author ysugimura
    *
    */
-  public static class VariousArrayListAdapter  {
+  public static class VariousArrayListHandler  {
     public static Handler<ArrayList<Various>> INSTANCE = 
         new HandlerBuilder<>(new TypeToken<ArrayList<Various>>() {}).
-      addSubHandler(FooAdapter.INSTANCE).build();
+      addSubHandler(FooHandler.INSTANCE).build();
     
   }
 
@@ -264,9 +264,9 @@ public class SerializerTest {
     }
   }
 
-  public static class VariousAdapter  {    
+  public static class VariousHandler  {    
     public static  Handler<Various> INSTANCE = 
-        new HandlerBuilder<>(Various.class).addSubHandler(FooAdapter.INSTANCE).build();
+        new HandlerBuilder<>(Various.class).addSubHandler(FooHandler.INSTANCE).build();
     
   }
 
@@ -311,7 +311,7 @@ public class SerializerTest {
     }
   }
   
-  public static class FooAdapter  {    
+  public static class FooHandler  {    
     public static MultiHandler<Foo> INSTANCE = new MultiHandlerBuilder<>(Foo.class)
         .addSubClasses(FooOne.class, FooTwo.class).build();
     

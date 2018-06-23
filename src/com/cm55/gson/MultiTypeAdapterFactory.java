@@ -13,15 +13,15 @@ import com.google.gson.stream.*;
  *
  * @param <T>
  */
-class MultiHandlerFactory<T> implements TypeAdapterFactory {
+class MultiTypeAdapterFactory<T> implements TypeAdapterFactory {
 
-  private static final boolean DEBUG = false;
+
   TypeToken<T> topType;
   TypeTokenNameMap typeTokenMap;
   Map<TypeToken<? extends T>, TypeAdapter<T>> subTypeAdapters;
   TypeAdapter<JsonElement> elementAdapter;
 
-  public MultiHandlerFactory(TypeToken<T> topType, TypeTokenNameMap typeTokenMap) {
+  public MultiTypeAdapterFactory(TypeToken<T> topType, TypeTokenNameMap typeTokenMap) {
     this.topType = topType;
     this.typeTokenMap = typeTokenMap;
   }
@@ -37,10 +37,6 @@ class MultiHandlerFactory<T> implements TypeAdapterFactory {
 
     // JsonElement用のTypeAdapterを取得する
     elementAdapter = gson.getAdapter(JsonElement.class);
-
-    if (DEBUG) {
-      System.out.println("returning for " + typeToken);
-    }
 
     return (TypeAdapter<C>) new GsonTypeAdapter<T>(this);
   }
@@ -76,10 +72,10 @@ class MultiHandlerFactory<T> implements TypeAdapterFactory {
   public static class GsonTypeAdapter<T> extends TypeAdapter<T> {
 
     /** タイプアダプタの実行環境 */
-    private MultiHandlerFactory<T> env;
+    private MultiTypeAdapterFactory<T> env;
 
     /** 実行環境を指定する */
-    public GsonTypeAdapter(MultiHandlerFactory<T> env) {
+    public GsonTypeAdapter(MultiTypeAdapterFactory<T> env) {
       this.env = env;
     }
 
@@ -101,9 +97,6 @@ class MultiHandlerFactory<T> implements TypeAdapterFactory {
       TypeAdapter<T> typeAdapter = env.subTypeAdapters.get(typeToken);
       JsonElement tree = typeAdapter.toJsonTree(value);
 
-      if (DEBUG) {
-        System.out.println("write " + value + "," + typeToken + "," + typeName);
-      }
 
       // オブジェクト書き込み開始
       writer.beginObject();
@@ -118,9 +111,6 @@ class MultiHandlerFactory<T> implements TypeAdapterFactory {
       // オブジェクト書き込み終了
       writer.endObject();
 
-      if (DEBUG) {
-        System.out.println("end of write");
-      }
     }
 
     /**

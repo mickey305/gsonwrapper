@@ -15,7 +15,7 @@ public class Sample2 {
   @Test
   public void test() {
     
-    Handler<Foo>fooHandler = new HandlerBuilder<>(Foo.class).addSubHandlers(
+    Handler<Foo>fooHandler = new HandlerBuilder<>(Foo.class).addSubHandler(
       new MultiHandlerBuilder<>(Bar.class).addSubClasses(Bar1.class, Bar2.class).build()
     ).build();
 

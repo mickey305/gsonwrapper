@@ -31,8 +31,8 @@ import com.google.gson.reflect.*;
  * どのクラスであるかを識別するために用いられる。具体的には、以下のように行う。
  * </p>
  * <pre>
- * class MyAdapter extends MultiTypeAdapter<Sample> {
- *   public MyAdapter() {
+ * class MyHandler extends MultiTypeHandler<Sample> {
+ *   public MyHandler() {
  *     super(Sample.class);
  *     add("a", SampleA.class);
  *     add("b", SampleB.class);
@@ -60,8 +60,8 @@ public class MultiHandler<T> extends Handler<T> {
    * 処理対象タイプを指定する
    * @param targetType
    */
-   MultiHandler(TypeToken<T> targetType,  List<Handler<?>>subAdapters, TypeTokenNameMap typeTokenMap) {
-    super(targetType, subAdapters);
+   MultiHandler(TypeToken<T> targetType,  List<Handler<?>>subHandlers, TypeTokenNameMap typeTokenMap) {
+    super(targetType, subHandlers);
     this.typeTokenMap = typeTokenMap;
   }
   
@@ -82,8 +82,8 @@ public class MultiHandler<T> extends Handler<T> {
       throw new JsonException("typeTokenMap empty");
     }
     
-    // 環境＝TypeAdapterFactoryをGsonに登録する
-    builder.registerTypeAdapterFactory(new MultiHandlerFactory<T>(
+    // 環境＝TypeHandlerFactoryをGsonに登録する
+    builder.registerTypeAdapterFactory(new MultiTypeAdapterFactory<T>(
         typeToken,
         this.typeTokenMap.duplicate()
     ));

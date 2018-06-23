@@ -16,7 +16,7 @@ public class MultiHandlerTest {
 //  @Test
 //  public void invalidTest() {
 //    try {
-//      Serializer<Bar>serializer = new Serializer<>(InvalidAdapter.INSTANCE);
+//      Serializer<Bar>serializer = new Serializer<>(InvalidHandler.INSTANCE);
 //      fail();
 //    } catch (Exception ex) {
 //      
@@ -31,7 +31,7 @@ public class MultiHandlerTest {
   
   @Test
   public void test0() {
-    Serializer<Bar>serializer = new Serializer<>(BarAdapter.INSTANCE);
+    Serializer<Bar>serializer = new Serializer<>(BarHandler.INSTANCE);
     Bar in = new BarTwo();
     String json = serializer.serialize(in);
     //PrintJsonForTest.printJson(json);
@@ -43,7 +43,7 @@ public class MultiHandlerTest {
   
   @Test
   public void test1() {
-    Serializer<Foo>serializer = new Serializer<>(FooAdapter.INSTANCE);
+    Serializer<Foo>serializer = new Serializer<>(FooHandler.INSTANCE);
     Foo in = new FooTwo();
     String json = serializer.serialize(in);
     //PrintJsonForTest.printJson(json);    
@@ -56,7 +56,7 @@ public class MultiHandlerTest {
   //@Test
   public void test1_1() {
     String json = "{\"T\":\"FooFour\",\"D\":{\"two\":2}}";
-    Serializer<Foo>serializer = new Serializer<Foo>(FooAdapter.INSTANCE);
+    Serializer<Foo>serializer = new Serializer<Foo>(FooHandler.INSTANCE);
     
     assertNull(serializer.deserialize(json));
     
@@ -70,7 +70,7 @@ public class MultiHandlerTest {
   
   @Test 
   public void 抽象クラスが入れ子になっているケース() {
-    Serializer<Foo>serializer = new Serializer<Foo>(FooAdapter.INSTANCE);
+    Serializer<Foo>serializer = new Serializer<Foo>(FooHandler.INSTANCE);
     Foo in = new FooThree(new BarTwo());
     String json = serializer.serialize(in);
     //PrintJsonForTest.printJson(json);
@@ -83,33 +83,33 @@ public class MultiHandlerTest {
   
   @Test
   public void test3() {
-    MultiHandlerBuilder<Bar> adapter = new MultiHandlerBuilder<Bar>(Bar.class);
-    adapter.addSubClass("one",  BarOne.class);
+    MultiHandlerBuilder<Bar> handler = new MultiHandlerBuilder<Bar>(Bar.class);
+    handler.addSubClass("one",  BarOne.class);
     
     // 同じクラスを別名称で登録しようとしている
     try {
-      adapter.addSubClass("two",  BarOne.class);
+      handler.addSubClass("two",  BarOne.class);
       fail();
     } catch (IllegalArgumentException ex) {      
     }
     
     // 同じ名称で、別のクラスを登録しようとしている。
     try {
-      adapter.addSubClass("one", BarTwo.class);
+      handler.addSubClass("one", BarTwo.class);
       fail();
     } catch (IllegalArgumentException ex) {      
     }
     
     // 同じ名称、同じクラスで登録
-    adapter.addSubClass("one", BarOne.class);
+    handler.addSubClass("one", BarOne.class);
     
-    assertEquals(1, adapter.build().subClassCount());
+    assertEquals(1, handler.build().subClassCount());
   }
   
-  public static class FooAdapter  {
+  public static class FooHandler  {
     public static final Handler<Foo> INSTANCE = 
         new MultiHandlerBuilder<>(Foo.class).addSubClasses(FooOne.class, FooTwo.class, FooThree.class)
-        .addSubHandlers(BarAdapter.INSTANCE).build();
+        .addSubHandler(BarHandler.INSTANCE).build();
 
   }
   
@@ -131,11 +131,11 @@ public class MultiHandlerTest {
     }
   }
   
-  public static class InvalidAdapter  {
+  public static class InvalidHandler  {
     public static final Handler<Bar> INSTANCE = new HandlerBuilder<>(Bar.class).build();
   }
   
-  public static class BarAdapter  {
+  public static class BarHandler  {
     public static final Handler<Bar> INSTANCE = new MultiHandlerBuilder<Bar>(Bar.class)
         .addSubClasses(BarOne.class, BarTwo.class).build();
   }

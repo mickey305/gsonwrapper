@@ -4,20 +4,25 @@ import java.util.*;
 
 import com.google.gson.reflect.*;
 
-/** ビルダー */
+/**
+ * {@link Handler}のビルダ
+ * @author ysugimura
+ *
+ * @param <T> 対象とするタイプ
+ */
 public class HandlerBuilder<T> {
-  
-  protected final TypeToken<T> typeToken;
+
+  /** タイプトークン */
+  protected TypeToken<T> typeToken;
 
   /**
-   * サブアダプタリスト
+   * サブハンドラリスト
    * <p>
-   * 対象とするタイプ（クラス）のフィールド等の型に対するアダプタがもし必要であればここに格納される。
+   * 対象とするタイプ（クラス）のフィールド等の型に対するハンドラがもし必要であればここに格納される。
    * 全く必要でない場合は{@link #subHandlers}の値はnullのまま
    * </p>
    */
   protected List<Handler<?>> subHandlers = null;
-
 
   /** クラスを指定する */
   public HandlerBuilder(Class<T> targetClass) {
@@ -29,32 +34,33 @@ public class HandlerBuilder<T> {
    * @param targetToken
    */
   public HandlerBuilder(TypeToken<T> typeToken) {
+    if (typeToken == null) throw new NullPointerException();
     this.typeToken = typeToken;
   }
 
   /**
-   * サブアダプタを追加する。
-   * <p>
-   * このオブジェクトが対象とするT型オブジェクトの中に、もし直列化・復帰のサポートが必要な クラスがある場合は、そのアダプタを登録する。
-   * </p>
-   * 
-   * @param subAdapter サブアダプタ
+   * サブハンドラを追加する
+   * @param handlers 複数のサブハンドラ
+   * @return 本オブジェクト
    */
-  public HandlerBuilder<T> addSubHandler(Handler<?> subAdapter) {
+  public HandlerBuilder<T> addSubHandler(Handler<?>... handlers) {
     if (subHandlers == null)
       subHandlers = new ArrayList<Handler<?>>();
-    subHandlers.add(subAdapter);
-    return this;
-  }
-
-  public HandlerBuilder<T> addSubHandlers(Handler<?>... subAdapters) {
-    for (Handler<?> adapter : subAdapters) {
-      addSubHandler(adapter);
+    for (Handler<?> handler : handlers) {
+      subHandlers.add(handler);
     }
     return this;
   }
-  
+
+  /**
+   * {@link Handler}をビルドする
+   * @return {@link Handler}
+   */
   public Handler<T> build() {
-    return new Handler<T>(typeToken, subHandlers);
+    if (typeToken == null) throw new IllegalStateException();
+    Handler<T>handler = new Handler<T>(typeToken, subHandlers);
+    typeToken = null;
+    subHandlers = null;
+    return handler;
   }
 }

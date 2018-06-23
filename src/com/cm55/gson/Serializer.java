@@ -16,7 +16,7 @@ import com.google.gson.reflect.*;
  * <ul>
  * <li>1.対象とするオブジェクトのクラス
  * <li>2.上記クラスがジェネリッククラスの場合には、その{@link TypeToken}
- * <li>3.{@link Handler}クラス階層以下のタイプアダプタ
+ * <li>3.{@link Handler}クラス階層以下のタイプハンドラ
  * </ul>
  * <p>
  * 単純なオブジェクトの場合には、1.2.のいずれかで良いが、以下のようなケースでは、3.を選択し、
@@ -31,7 +31,7 @@ import com.google.gson.reflect.*;
  * FooOne, FooTwoのオブジェクトが格納されている場合がある。これを正しく扱うには、{@link MultiHandler}
  * を使用しなければならない。詳細は{@link MultiHandler}を参照のこと。
  * </p>
- * <h2>MultiTypeAdapterでのClassNotFound</h2>
+ * <h2>MultiTypeHandlerでのClassNotFound</h2>
  * <p>
  * {@link MultiHandler}を使用した直列化では、直列化後のJSON文字列に、実際のクラス名称
  * （もしくはユーザが決めた名称）が記述されている。何らかの理由で直列化後にこの名称を変更した場合、
@@ -58,7 +58,7 @@ public class Serializer<T> {
   private boolean nullIfClassNotFound = true;
   
   /**
-   * 単純なクラスについて{@link BaseAdapter}を省略してシリアライザを作成する。
+   * 単純なクラスについて{@link BaseHandler}を省略してシリアライザを作成する。
    * @param clazz 対象とするクラス
    * @return シリアライザ
    */
@@ -67,7 +67,7 @@ public class Serializer<T> {
   }
 
   /**
-   * {@link TypeToken}について{@link BaseAdapter}を省略してシリアライザを作成する。
+   * {@link TypeToken}について{@link BaseHandler}を省略してシリアライザを作成する。
    * @param token {@link TypeToken}
    * @return シリアライザ
    */

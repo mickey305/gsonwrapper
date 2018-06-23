@@ -2,13 +2,23 @@ package com.cm55.gson;
 
 import com.google.gson.reflect.*;
 
+/**
+ * {@link MultiHandler}のビルダ
+ * @author ysugimura
+ *
+ * @param <T> 対象とするタイプ
+ */
 public class MultiHandlerBuilder<T> extends HandlerBuilder<T> {
-  private final TypeTokenNameMap typeTokenMap = new TypeTokenNameMap();
+  
+  private TypeTokenNameMap typeTokenMap = new TypeTokenNameMap();
 
   public MultiHandlerBuilder(Class<T> targetType) {
     super(targetType);
   }
 
+  public MultiHandlerBuilder(TypeToken<T> typeToken) {
+    super(typeToken);
+  }
 
   /**
    * 登録するタイプを複数指定する。 各クラスの登録名称は{@link Class#getSimpleName()}で取得される文字列になる。
@@ -38,52 +48,53 @@ public class MultiHandlerBuilder<T> extends HandlerBuilder<T> {
   /**
    * 登録するタイプトークンを指定する。名称はRawタイプの{@link Class#getSimpleName()}となる。
    * 
-   * @param typeClass
+   * @param subTypeClass
    */
-  public MultiHandlerBuilder<T> addSubClass(TypeToken<? extends T> typeClass) {
-    addSubClass(typeClass.getRawType().getSimpleName(), typeClass);
+  public MultiHandlerBuilder<T> addSubClass(TypeToken<? extends T> subTypeClass) {
+    addSubClass(subTypeClass.getRawType().getSimpleName(), subTypeClass);
     return this;
   }
 
   /**
    * 登録するクラスと、その名称を指定する
-   * 
-   * @param typeName
-   *          登録名称
-   * @param typeClass
-   *          登録クラス
+   * @param typeName 登録名称
+   * @param subTypeClass 登録クラス
    */
-  public MultiHandlerBuilder<T> addSubClass(String typeName, Class<? extends T> typeClass) {
-    addSubClass(typeName, TypeToken.get(typeClass));
+  public MultiHandlerBuilder<T> addSubClass(String typeName, Class<? extends T> subTypeClass) {
+    addSubClass(typeName, TypeToken.get(subTypeClass));
     return this;
   }
 
   /**
    * タイプ名称とそのクラスを指定して登録する。 既に登録されている場合は例外が発生する。
    * 
-   * @param typeName
-   *          登録名称 JSON中に書き出されるマーカー文字列
-   * @param typeToken
-   *          登録クラス 上記マーカー文字列の場合に中身とされるクラスのタイプトークン
+   * @param typeName  登録名称 JSON中に書き出されるマーカー文字列
+   * @param typeToken 登録クラス 上記マーカー文字列の場合に中身とされるクラスのタイプトークン
    */
-  public MultiHandlerBuilder<T> addSubClass(String typeName, TypeToken<? extends T> _typeToken) {
-    TypeToken<T> topType = typeToken;
-    if (!topType.getRawType().isAssignableFrom(_typeToken.getRawType())) {
-      throw new IllegalArgumentException(_typeToken + " is not assignable to " + topType);
+  public MultiHandlerBuilder<T> addSubClass(String typeName, TypeToken<? extends T> subTypeToken) {
+    if (!typeToken.getRawType().isAssignableFrom(subTypeToken.getRawType())) {
+      throw new IllegalArgumentException(subTypeToken + " is not assignable to " + typeToken);
     }
-    typeTokenMap.addType(typeName, _typeToken);
+    typeTokenMap.addType(typeName, subTypeToken);
     return this;
   }
-  
-  public MultiHandlerBuilder<T> addSubHandler(Handler<?> subAdapter) {
-    return (MultiHandlerBuilder<T>)super.addSubHandler(subAdapter);
+
+  /**
+   * サブハンドラを登録する
+   */
+  public MultiHandlerBuilder<T> addSubHandler(Handler<?>... subHandlers) {
+    return (MultiHandlerBuilder<T>)super.addSubHandler(subHandlers);
   }
 
-  public MultiHandlerBuilder<T> addSubHandlers(Handler<?>... subAdapters) {
-    return (MultiHandlerBuilder<T>)super.addSubHandlers(subAdapters);
-  }
-  
+  /**
+   * ビルドする
+   */
   public MultiHandler<T> build() {
-    return new MultiHandler<T>(typeToken, subHandlers, typeTokenMap);
+    if (typeToken == null) throw new IllegalStateException();
+    MultiHandler<T>handler = new MultiHandler<T>(typeToken, subHandlers, typeTokenMap);
+    typeToken = null;
+    subHandlers = null;
+    typeTokenMap = null;
+    return handler;
   }
 }

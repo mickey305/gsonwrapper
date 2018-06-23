@@ -7,14 +7,14 @@ import com.google.gson.reflect.*;
 
 /**
  * @author ysugimura
- * @param <T> アダプタの対象とするクラスの型
+ * @param <T> ハンドラの対象とするクラスの型
  */
 public class Handler<T> {
 
   /**
    * 対象タイプ
    * <p>
-   * このアダプタが対象とするクラスもしくはタイプだが、必ずしもそのオブジェクトに対する特殊な処理を行うとは限らない。
+   * このハンドラが対象とするクラスもしくはタイプだが、必ずしもそのオブジェクトに対する特殊な処理を行うとは限らない。
    * 単にクラスもしくはタイプ、つまり「型」を保持するだけの目的の場合もある。
    * 通常は単なるクラスオブジェクトであるが、ジェネリックス型の場合には以下のようなタイプオブジェクトが格納されている場合もある。
    * </p>
@@ -28,21 +28,21 @@ public class Handler<T> {
   protected final TypeToken<T> typeToken;
 
   /**
-   * サブアダプタリスト
+   * サブハンドラリスト
    * <p>
-   * 対象とするタイプ（クラス）のフィールド等の型に対するアダプタがもし必要であればここに格納される。
+   * 対象とするタイプ（クラス）のフィールド等の型に対するハンドラがもし必要であればここに格納される。
    * 全く必要でない場合は{@link #subHandlers}の値はnullのまま
    * </p>
    */
   private final List<Handler<?>> subHandlers;
 
-  protected Handler(TypeToken<T> typeToken, List<Handler<?>> subAdapters) {
+  protected Handler(TypeToken<T> typeToken, List<Handler<?>> subHandlers) {
     this.typeToken = typeToken;
-    this.subHandlers = subAdapters;
+    this.subHandlers = subHandlers;
   }
 
   /**
-   * このアダプタが対象とするタイプを取得する。
+   * このハンドラが対象とするタイプを取得する。
    * @return タイプトークン
    */
   public TypeToken<T> getTypeToken() {
@@ -50,14 +50,14 @@ public class Handler<T> {
   }
   
   /**
-   * このアダプタの特殊処理をGsonBuilderに登録する。
+   * このハンドラの特殊処理をGsonBuilderに登録する。
    * @param builder {@link GsonBuilder}
    */
   protected void registerToBuilder(GsonBuilder builder) {
 
     // T型に関する特殊処理はサブクラスで定義される。
 
-    // サブアダプタがもしあれば、これらについての特殊処理を行う。
+    // サブハンドラがもしあれば、これらについての特殊処理を行う。
     if (subHandlers == null)
       return;
     for (Handler<?> subHandler : subHandlers) {
