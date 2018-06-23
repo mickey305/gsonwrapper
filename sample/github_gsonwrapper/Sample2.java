@@ -10,15 +10,9 @@ import org.junit.*;
 import com.cm55.gson.*;
 
 public class Sample2 {
-
-
+  
   @Test
   public void test() {
-    
-    Handler<Foo>fooHandler = new HandlerBuilder<>(Foo.class).addSubHandler(
-      new MultiHandlerBuilder<>(Bar.class).addSubClasses(Bar1.class, Bar2.class).build()
-    ).build();
-
     
     // Fooに対するシリアライザを作成する
     Serializer<Foo>serializer = new Serializer<>(fooHandler);
@@ -32,16 +26,19 @@ public class Sample2 {
       foo.list.add(new Bar1());
       foo.list.add(new Bar2());
       json = serializer.serialize(foo);
-      System.out.println("" + json);     
+      assertEquals("{\"list\":[{\"T\":\"Bar1\",\"D\":{\"b\":2,\"a\":1}},{\"T\":\"Bar2\",\"D\":{\"c\":3,\"a\":1}}]}", json);
     }
     
     // JSON文字列からオブジェクトを再構築
     {
       Foo foo = serializer.deserialize(json);
-      assertEquals("testString1,null,1,2,3,4", foo.toString());
+      assertEquals("Bar1 1,2,Bar2 1,3", foo.toString());
     }
   }
 
+  static Handler<Bar>barHandler = new MultiHandlerBuilder<>(Bar.class).addSubClasses(Bar1.class, Bar2.class).build();
+  static Handler<Foo>fooHandler = new HandlerBuilder<>(Foo.class).addSubHandler(barHandler).build();
+  
   public static class Foo {
     List<Bar>list = new ArrayList<>();
     @Override
@@ -49,7 +46,7 @@ public class Sample2 {
       return list.stream().map(b->b.toString()).collect(Collectors.joining(","));
     }
   }
-  
+    
   public static abstract class Bar {
     int a = 1;
   }
