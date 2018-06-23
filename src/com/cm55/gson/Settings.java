@@ -1,15 +1,31 @@
 package com.cm55.gson;
 
+/**
+ * 本ライブラリの動作を変更するフラグ類
+ * @author ysugimura
+ */
 public class Settings {
 
-  /** JSONのエンコーディング */
+  /** JSONのエンコーディング。出力時にはこのエンコーディングで出力し、入力はこのエンコーディングであるものとする */
   public static String ENCODING = "UTF-8";
   
-  /** マルチタイプ・タイプフィールドマーカ */
-  public static String MULTITYPE_TYPE_MARKER = "T";
+  /** 
+   * マルチハンドラ・タイプフィールドマーカ 
+   * {@link MultiHandler}によってJSON化される場合に、タイプとして使用するフィールドの名称。例えば以下になる。
+   * <pre>
+   * {"T":"BarTwo","D":{"b":2}}
+   * </pre>
+   */
+  public static String MULTIHANDLER_TYPE_MARKER = "T";
 
-  /** マルチタイプ・データフィールドマーカ */
-  public static String MULTITYPE_DATA_MARKER = "D";
+  /** 
+   * マルチハンドラ・データフィールドマーカ
+   * {@link MultiHandler}によってJSON化される場合に、データとして使用するフィールドの名称。例えば以下になる。
+   * <pre>
+   * {"T":"BarTwo","D":{"b":2}}
+   * </pre>
+   */
+  public static String MULTIHANDLER_DATA_MARKER = "D";
   
     
   /**

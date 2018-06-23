@@ -27,7 +27,7 @@ import com.google.gson.reflect.*;
  * がわからなくなるからである。直列化のときにも直列化復帰の時にも、格納されるオブジェクトについて特別な処理を行わなければならない。
  * </p>
  * <p>
- * {@link MultiTypeAdapter}は、あるクラスの代わりとなる可能性のあるすべてのクラスを定義しておき、直列化の際にも直列化復帰の際にも
+ * {@link MultiHandler}は、あるクラスの代わりとなる可能性のあるすべてのクラスを定義しておき、直列化の際にも直列化復帰の際にも
  * どのクラスであるかを識別するために用いられる。具体的には、以下のように行う。
  * </p>
  * <pre>
@@ -51,7 +51,7 @@ import com.google.gson.reflect.*;
  *
  * @param <T>
  */
-public class MultiTypeAdapter<T> extends Adapter<T> {
+public class MultiHandler<T> extends Handler<T> {
 
   /** TypeTokenのマップ */
   private final TypeTokenNameMap typeTokenMap;
@@ -60,7 +60,7 @@ public class MultiTypeAdapter<T> extends Adapter<T> {
    * 処理対象タイプを指定する
    * @param targetType
    */
-   MultiTypeAdapter(TypeToken<T> targetType,  List<Adapter<?>>subAdapters, TypeTokenNameMap typeTokenMap) {
+   MultiHandler(TypeToken<T> targetType,  List<Handler<?>>subAdapters, TypeTokenNameMap typeTokenMap) {
     super(targetType, subAdapters);
     this.typeTokenMap = typeTokenMap;
   }
@@ -83,7 +83,7 @@ public class MultiTypeAdapter<T> extends Adapter<T> {
     }
     
     // 環境＝TypeAdapterFactoryをGsonに登録する
-    builder.registerTypeAdapterFactory(new MultiTypeAdapterFactory<T>(
+    builder.registerTypeAdapterFactory(new MultiHandlerFactory<T>(
         typeToken,
         this.typeTokenMap.duplicate()
     ));

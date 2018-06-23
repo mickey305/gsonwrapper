@@ -16,11 +16,11 @@ import com.google.gson.reflect.*;
  * <ul>
  * <li>1.対象とするオブジェクトのクラス
  * <li>2.上記クラスがジェネリッククラスの場合には、その{@link TypeToken}
- * <li>3.{@link Adapter}クラス階層以下のタイプアダプタ
+ * <li>3.{@link Handler}クラス階層以下のタイプアダプタ
  * </ul>
  * <p>
  * 単純なオブジェクトの場合には、1.2.のいずれかで良いが、以下のようなケースでは、3.を選択し、
- * 特に{@link MultiTypeAdapter}を使用しなければならない。
+ * 特に{@link MultiHandler}を使用しなければならない。
  * </p>
  * <ul>
  * <li>対象とするオブジェクト自身、そのオブジェクト内のフィールドオブジェクト、さらにその中のフィールド
@@ -28,12 +28,12 @@ import com.google.gson.reflect.*;
  * </ul>
  * <p>
  * 例えば、直列化・復帰対象オブジェクトの字面としてはFooだとしても、実際にはそのサブクラスの
- * FooOne, FooTwoのオブジェクトが格納されている場合がある。これを正しく扱うには、{@link MultiTypeAdapter}
- * を使用しなければならない。詳細は{@link MultiTypeAdapter}を参照のこと。
+ * FooOne, FooTwoのオブジェクトが格納されている場合がある。これを正しく扱うには、{@link MultiHandler}
+ * を使用しなければならない。詳細は{@link MultiHandler}を参照のこと。
  * </p>
  * <h2>MultiTypeAdapterでのClassNotFound</h2>
  * <p>
- * {@link MultiTypeAdapter}を使用した直列化では、直列化後のJSON文字列に、実際のクラス名称
+ * {@link MultiHandler}を使用した直列化では、直列化後のJSON文字列に、実際のクラス名称
  * （もしくはユーザが決めた名称）が記述されている。何らかの理由で直列化後にこの名称を変更した場合、
  * 復帰時にJsonClassNotFoundExceptionを発生させている。
  * </p>
@@ -49,10 +49,10 @@ import com.google.gson.reflect.*;
 public class Serializer<T> {
 
   /** このシリアライザが直列化及び復帰を行う対象のクラス */
-  private TypeToken<T> topType;
+  private final TypeToken<T> typeToken;
   
   /** Gson実行オブジェクト */
-  private Gson gson;
+  private final Gson gson;
   
   /** 復帰時にクラスが見つからない場合はnullを返す */
   private boolean nullIfClassNotFound = true;
@@ -63,7 +63,7 @@ public class Serializer<T> {
    * @return シリアライザ
    */
   public Serializer(Class<T>clazz) {
-    this(new AdapterBuilder<T>(clazz).build());
+    this(new HandlerBuilder<T>(clazz).build());
   }
 
   /**
@@ -72,34 +72,37 @@ public class Serializer<T> {
    * @return シリアライザ
    */
   public Serializer(TypeToken<T>token) {
-    this(new AdapterBuilder<T>(token).build());
+    this(new HandlerBuilder<T>(token).build());
   }
   
   /**
-   * {@link Adapter}を指定して{@link Serializer}オブジェクトを作成する。
-   * @param def 直列化定義オブジェクト
-   * @return 直列化実行オブジェクト
+   * {@link Handler}を指定して{@link Serializer}オブジェクトを作成する。
+   * @param handler タイプハンドラ
    */
-  public Serializer(Adapter<T> adapter) {
-        
-    // このアダプタおよび、複数のサブアダプタをGsonBuilderに登録する
-    GsonBuilder builder = createGsonBuilder();
-    adapter.registerToBuilder(builder);    
+  public Serializer(Handler<T> handler) {
+
+    // ハンドラからTypeTokenを取得する
+    typeToken = handler.getTypeToken();
+    
+    // GsonBuilderを作成する
+    GsonBuilder builder = new GsonBuilder();    
+    if (Settings.ENABLE_COMPLEX_MAP_KEY_SERIALIZATION) {
+      builder.enableComplexMapKeySerialization();
+    }    
+    if (Settings.SERIALIZE_NULLS) {
+      builder.serializeNulls();
+    }    
+    if (Settings.SERIALIZE_SPECIAL_FLOATING_POINT_VALUES) {
+      builder.serializeSpecialFloatingPointValues();
+    }
+    
+    // このハンドラ及び複数のサブハンドラの処理をGsonBuilderに登録する。
+    handler.registerToBuilder(builder);    
 
     // gsonを作成する
-    Gson gson = builder.create();
-    
-    setup(adapter.getTypeToken(), gson);
-  }    
-  
-  public Serializer(TypeToken<T> topType, Gson gson) {
-    setup(topType, gson);
+    gson = builder.create();
   }
-  
-  private void setup(TypeToken<T> topType, Gson gson) {
-    this.topType = topType;
-    this.gson = gson;
-  }
+
   
   /**
    * 復帰時にクラスが見つからない場合にnullを返す。
@@ -119,7 +122,7 @@ public class Serializer<T> {
   public String serialize(T object) {
     if (object == null) return null;
     try {
-      return gson.toJson(object, topType.getType());
+      return gson.toJson(object, typeToken.getType());
     } catch (RuntimeException ex) {
       throw new JsonException(ex);
     }
@@ -168,7 +171,7 @@ public class Serializer<T> {
   public T deserialize(String json) {
     if (json == null) return null;
     try {
-      return (T)gson.fromJson(json, topType.getType());
+      return (T)gson.fromJson(json, typeToken.getType());
     } catch (JsonClassNotFoundException ex) {
       // 復帰時にクラスが見つからない場合
       if (nullIfClassNotFound) return null;          
@@ -244,26 +247,4 @@ public class Serializer<T> {
     }
   }
 
-  /**
-   * {@link GsonBuilder}を作成する。各フラグについては{@link Settings}を参照のこと。
-   * @return　{@link GsonBuilder}
-   */
-  protected static <T>GsonBuilder createGsonBuilder() {
-    
-    GsonBuilder builder = new GsonBuilder();
-    
-    if (Settings.ENABLE_COMPLEX_MAP_KEY_SERIALIZATION) {
-      builder.enableComplexMapKeySerialization();
-    }
-    
-    if (Settings.SERIALIZE_NULLS) {
-      builder.serializeNulls();
-    }
-    
-    if (Settings.SERIALIZE_SPECIAL_FLOATING_POINT_VALUES) {
-      builder.serializeSpecialFloatingPointValues();
-    }
-
-    return builder;
-  }
 }

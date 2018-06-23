@@ -9,7 +9,7 @@ import com.google.gson.reflect.*;
  * @author ysugimura
  * @param <T> アダプタの対象とするクラスの型
  */
-public class Adapter<T> {
+public class Handler<T> {
 
   /**
    * 対象タイプ
@@ -31,14 +31,14 @@ public class Adapter<T> {
    * サブアダプタリスト
    * <p>
    * 対象とするタイプ（クラス）のフィールド等の型に対するアダプタがもし必要であればここに格納される。
-   * 全く必要でない場合は{@link #subAdapters}の値はnullのまま
+   * 全く必要でない場合は{@link #subHandlers}の値はnullのまま
    * </p>
    */
-  private final List<Adapter<?>> subAdapters;
+  private final List<Handler<?>> subHandlers;
 
-  protected Adapter(TypeToken<T> typeToken, List<Adapter<?>> subAdapters) {
+  protected Handler(TypeToken<T> typeToken, List<Handler<?>> subAdapters) {
     this.typeToken = typeToken;
-    this.subAdapters = subAdapters;
+    this.subHandlers = subAdapters;
   }
 
   /**
@@ -58,10 +58,10 @@ public class Adapter<T> {
     // T型に関する特殊処理はサブクラスで定義される。
 
     // サブアダプタがもしあれば、これらについての特殊処理を行う。
-    if (subAdapters == null)
+    if (subHandlers == null)
       return;
-    for (Adapter<?> subAdapter : subAdapters) {
-      subAdapter.registerToBuilder(builder);
+    for (Handler<?> subHandler : subHandlers) {
+      subHandler.registerToBuilder(builder);
     }
   }
 }

@@ -6,7 +6,7 @@ import org.junit.*;
 
 import com.google.gson.reflect.*;
 
-public class MultiTypeAdapterTest {
+public class MultiHandlerTest {
 
   @Before
   public void before() {
@@ -83,7 +83,7 @@ public class MultiTypeAdapterTest {
   
   @Test
   public void test3() {
-    MultiTypeAdapterBuilder<Bar> adapter = new MultiTypeAdapterBuilder<Bar>(Bar.class);
+    MultiHandlerBuilder<Bar> adapter = new MultiHandlerBuilder<Bar>(Bar.class);
     adapter.addSubClass("one",  BarOne.class);
     
     // 同じクラスを別名称で登録しようとしている
@@ -107,9 +107,9 @@ public class MultiTypeAdapterTest {
   }
   
   public static class FooAdapter  {
-    public static final Adapter<Foo> INSTANCE = 
-        new MultiTypeAdapterBuilder<>(Foo.class).addSubClasses(FooOne.class, FooTwo.class, FooThree.class)
-        .addSubAdapters(BarAdapter.INSTANCE).build();
+    public static final Handler<Foo> INSTANCE = 
+        new MultiHandlerBuilder<>(Foo.class).addSubClasses(FooOne.class, FooTwo.class, FooThree.class)
+        .addSubHandlers(BarAdapter.INSTANCE).build();
 
   }
   
@@ -132,11 +132,11 @@ public class MultiTypeAdapterTest {
   }
   
   public static class InvalidAdapter  {
-    public static final Adapter<Bar> INSTANCE = new AdapterBuilder<>(Bar.class).build();
+    public static final Handler<Bar> INSTANCE = new HandlerBuilder<>(Bar.class).build();
   }
   
   public static class BarAdapter  {
-    public static final Adapter<Bar> INSTANCE = new MultiTypeAdapterBuilder<Bar>(Bar.class)
+    public static final Handler<Bar> INSTANCE = new MultiHandlerBuilder<Bar>(Bar.class)
         .addSubClasses(BarOne.class, BarTwo.class).build();
   }
   

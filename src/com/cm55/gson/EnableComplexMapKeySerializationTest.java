@@ -22,7 +22,7 @@ public class EnableComplexMapKeySerializationTest {
   
   @Before
   public void before() { 
-    serializer = new Serializer<TheObject>(TheObjectAdapter.INSTANCE);
+    serializer = new Serializer<TheObject>(TheObjectHandler.INSTANCE);
   }
   
   
@@ -59,8 +59,8 @@ public class EnableComplexMapKeySerializationTest {
     }    
   }
 
-  public static class TheObjectAdapter  {
-    public static final Adapter<TheObject> INSTANCE = new AdapterBuilder<>(TheObject.class).build();
+  public static class TheObjectHandler  {
+    public static final Handler<TheObject> INSTANCE = new HandlerBuilder<>(TheObject.class).build();
     
   }
   

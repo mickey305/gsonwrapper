@@ -13,7 +13,7 @@ import com.google.gson.stream.*;
  *
  * @param <T>
  */
-class MultiTypeAdapterFactory<T> implements TypeAdapterFactory {
+class MultiHandlerFactory<T> implements TypeAdapterFactory {
 
   private static final boolean DEBUG = false;
   TypeToken<T> topType;
@@ -21,7 +21,7 @@ class MultiTypeAdapterFactory<T> implements TypeAdapterFactory {
   Map<TypeToken<? extends T>, TypeAdapter<T>> subTypeAdapters;
   TypeAdapter<JsonElement> elementAdapter;
 
-  public MultiTypeAdapterFactory(TypeToken<T> topType, TypeTokenNameMap typeTokenMap) {
+  public MultiHandlerFactory(TypeToken<T> topType, TypeTokenNameMap typeTokenMap) {
     this.topType = topType;
     this.typeTokenMap = typeTokenMap;
   }
@@ -76,10 +76,10 @@ class MultiTypeAdapterFactory<T> implements TypeAdapterFactory {
   public static class GsonTypeAdapter<T> extends TypeAdapter<T> {
 
     /** タイプアダプタの実行環境 */
-    private MultiTypeAdapterFactory<T> env;
+    private MultiHandlerFactory<T> env;
 
     /** 実行環境を指定する */
-    public GsonTypeAdapter(MultiTypeAdapterFactory<T> env) {
+    public GsonTypeAdapter(MultiHandlerFactory<T> env) {
       this.env = env;
     }
 
@@ -109,10 +109,10 @@ class MultiTypeAdapterFactory<T> implements TypeAdapterFactory {
       writer.beginObject();
 
       // 型フィールドを書き込み
-      writer.name(Settings.MULTITYPE_TYPE_MARKER).value(typeName);
+      writer.name(Settings.MULTIHANDLER_TYPE_MARKER).value(typeName);
 
       // データフィールドを書き込み
-      writer.name(Settings.MULTITYPE_DATA_MARKER);
+      writer.name(Settings.MULTIHANDLER_DATA_MARKER);
       env.elementAdapter.write(writer, tree);
 
       // オブジェクト書き込み終了
@@ -135,13 +135,13 @@ class MultiTypeAdapterFactory<T> implements TypeAdapterFactory {
 
       // 型フィールド、データフィールドを読み出し
       String typeField = reader.nextName();
-      if (!typeField.equals(Settings.MULTITYPE_TYPE_MARKER)) {
+      if (!typeField.equals(Settings.MULTIHANDLER_TYPE_MARKER)) {
         // assertにしてしまうと復旧ができないので例外にする
         throw new JsonException("Invalid TYPE FIELD Marker in MultiTypeAdapter:" + typeField);
       }
       String typeName = reader.nextString();
       String dataField = reader.nextName();
-      if (!dataField.equals(Settings.MULTITYPE_DATA_MARKER)) {
+      if (!dataField.equals(Settings.MULTIHANDLER_DATA_MARKER)) {
         // assertにしてしまうと復旧ができないので例外にする
         throw new JsonException("Invalid DATA FIELD Marker in MultiTypeAdapter:" + dataField);
       }

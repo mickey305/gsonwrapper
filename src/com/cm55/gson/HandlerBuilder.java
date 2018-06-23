@@ -5,7 +5,7 @@ import java.util.*;
 import com.google.gson.reflect.*;
 
 /** ビルダー */
-public class AdapterBuilder<T> {
+public class HandlerBuilder<T> {
   
   protected final TypeToken<T> typeToken;
 
@@ -13,14 +13,14 @@ public class AdapterBuilder<T> {
    * サブアダプタリスト
    * <p>
    * 対象とするタイプ（クラス）のフィールド等の型に対するアダプタがもし必要であればここに格納される。
-   * 全く必要でない場合は{@link #subAdapters}の値はnullのまま
+   * 全く必要でない場合は{@link #subHandlers}の値はnullのまま
    * </p>
    */
-  protected List<Adapter<?>> subAdapters = null;
+  protected List<Handler<?>> subHandlers = null;
 
 
   /** クラスを指定する */
-  public AdapterBuilder(Class<T> targetClass) {
+  public HandlerBuilder(Class<T> targetClass) {
     this(TypeToken.get(targetClass));
   }
 
@@ -28,7 +28,7 @@ public class AdapterBuilder<T> {
    * タイプトークンを指定する
    * @param targetToken
    */
-  public AdapterBuilder(TypeToken<T> typeToken) {
+  public HandlerBuilder(TypeToken<T> typeToken) {
     this.typeToken = typeToken;
   }
 
@@ -40,21 +40,21 @@ public class AdapterBuilder<T> {
    * 
    * @param subAdapter サブアダプタ
    */
-  public AdapterBuilder<T> addSubAdapter(Adapter<?> subAdapter) {
-    if (subAdapters == null)
-      subAdapters = new ArrayList<Adapter<?>>();
-    subAdapters.add(subAdapter);
+  public HandlerBuilder<T> addSubHandler(Handler<?> subAdapter) {
+    if (subHandlers == null)
+      subHandlers = new ArrayList<Handler<?>>();
+    subHandlers.add(subAdapter);
     return this;
   }
 
-  public AdapterBuilder<T> addSubAdapters(Adapter<?>... subAdapters) {
-    for (Adapter<?> adapter : subAdapters) {
-      addSubAdapter(adapter);
+  public HandlerBuilder<T> addSubHandlers(Handler<?>... subAdapters) {
+    for (Handler<?> adapter : subAdapters) {
+      addSubHandler(adapter);
     }
     return this;
   }
   
-  public Adapter<T> build() {
-    return new Adapter<T>(typeToken, subAdapters);
+  public Handler<T> build() {
+    return new Handler<T>(typeToken, subHandlers);
   }
 }

@@ -46,7 +46,7 @@
  * </p>
  * <h2>抽象クラスを直列化する場合</h2>
  * <p>
- * この場合には、{@link MultiTypeAdapter}を使用する。
+ * この場合には、{@link MultiHandler}を使用する。
  * </p>
  * <pre>
  * public static abstract class Bar {}

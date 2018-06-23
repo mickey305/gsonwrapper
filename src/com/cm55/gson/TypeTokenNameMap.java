@@ -9,7 +9,7 @@ import com.google.gson.reflect.*;
  * 名称とTypeTokenのマップ
  * <p>
  * 単純に任意のT型のTypeTokenと名称文字列を結びつけておくためのもの。
- * これは{@link MultiTypeAdapter}内部で使用される。
+ * これは{@link MultiHandler}内部で使用される。
  * </p>
  * @author ysugimura
  */

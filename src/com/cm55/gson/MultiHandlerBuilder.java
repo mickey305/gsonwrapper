@@ -2,10 +2,10 @@ package com.cm55.gson;
 
 import com.google.gson.reflect.*;
 
-public class MultiTypeAdapterBuilder<T> extends AdapterBuilder<T> {
+public class MultiHandlerBuilder<T> extends HandlerBuilder<T> {
   private final TypeTokenNameMap typeTokenMap = new TypeTokenNameMap();
 
-  public MultiTypeAdapterBuilder(Class<T> targetType) {
+  public MultiHandlerBuilder(Class<T> targetType) {
     super(targetType);
   }
 
@@ -17,7 +17,7 @@ public class MultiTypeAdapterBuilder<T> extends AdapterBuilder<T> {
    *          登録対象クラス（複数）
    */
   @SafeVarargs
-  public final MultiTypeAdapterBuilder<T> addSubClasses(Class<? extends T>... classes) {
+  public final MultiHandlerBuilder<T> addSubClasses(Class<? extends T>... classes) {
     for (Class<? extends T> clazz : classes) {
       addSubClass(clazz);
     }
@@ -30,7 +30,7 @@ public class MultiTypeAdapterBuilder<T> extends AdapterBuilder<T> {
    * @param clazz
    *          対象クラス
    */
-  public MultiTypeAdapterBuilder<T> addSubClass(Class<? extends T> clazz) {
+  public MultiHandlerBuilder<T> addSubClass(Class<? extends T> clazz) {
     addSubClass(clazz.getSimpleName(), clazz);
     return this;
   }
@@ -40,7 +40,7 @@ public class MultiTypeAdapterBuilder<T> extends AdapterBuilder<T> {
    * 
    * @param typeClass
    */
-  public MultiTypeAdapterBuilder<T> addSubClass(TypeToken<? extends T> typeClass) {
+  public MultiHandlerBuilder<T> addSubClass(TypeToken<? extends T> typeClass) {
     addSubClass(typeClass.getRawType().getSimpleName(), typeClass);
     return this;
   }
@@ -53,7 +53,7 @@ public class MultiTypeAdapterBuilder<T> extends AdapterBuilder<T> {
    * @param typeClass
    *          登録クラス
    */
-  public MultiTypeAdapterBuilder<T> addSubClass(String typeName, Class<? extends T> typeClass) {
+  public MultiHandlerBuilder<T> addSubClass(String typeName, Class<? extends T> typeClass) {
     addSubClass(typeName, TypeToken.get(typeClass));
     return this;
   }
@@ -66,7 +66,7 @@ public class MultiTypeAdapterBuilder<T> extends AdapterBuilder<T> {
    * @param typeToken
    *          登録クラス 上記マーカー文字列の場合に中身とされるクラスのタイプトークン
    */
-  public MultiTypeAdapterBuilder<T> addSubClass(String typeName, TypeToken<? extends T> _typeToken) {
+  public MultiHandlerBuilder<T> addSubClass(String typeName, TypeToken<? extends T> _typeToken) {
     TypeToken<T> topType = typeToken;
     if (!topType.getRawType().isAssignableFrom(_typeToken.getRawType())) {
       throw new IllegalArgumentException(_typeToken + " is not assignable to " + topType);
@@ -75,15 +75,15 @@ public class MultiTypeAdapterBuilder<T> extends AdapterBuilder<T> {
     return this;
   }
   
-  public MultiTypeAdapterBuilder<T> addSubAdapter(Adapter<?> subAdapter) {
-    return (MultiTypeAdapterBuilder<T>)super.addSubAdapter(subAdapter);
+  public MultiHandlerBuilder<T> addSubHandler(Handler<?> subAdapter) {
+    return (MultiHandlerBuilder<T>)super.addSubHandler(subAdapter);
   }
 
-  public MultiTypeAdapterBuilder<T> addSubAdapters(Adapter<?>... subAdapters) {
-    return (MultiTypeAdapterBuilder<T>)super.addSubAdapters(subAdapters);
+  public MultiHandlerBuilder<T> addSubHandlers(Handler<?>... subAdapters) {
+    return (MultiHandlerBuilder<T>)super.addSubHandlers(subAdapters);
   }
   
-  public MultiTypeAdapter<T> build() {
-    return new MultiTypeAdapter<T>(typeToken, subAdapters, typeTokenMap);
+  public MultiHandler<T> build() {
+    return new MultiHandler<T>(typeToken, subHandlers, typeTokenMap);
   }
 }

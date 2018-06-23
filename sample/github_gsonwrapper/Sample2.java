@@ -15,13 +15,13 @@ public class Sample2 {
   @Test
   public void test() {
     
-    Adapter<Foo>fooAdapter = new AdapterBuilder<>(Foo.class).addSubAdapters(
-      new MultiTypeAdapterBuilder<>(Bar.class).addSubClasses(Bar1.class, Bar2.class).build()
+    Handler<Foo>fooHandler = new HandlerBuilder<>(Foo.class).addSubHandlers(
+      new MultiHandlerBuilder<>(Bar.class).addSubClasses(Bar1.class, Bar2.class).build()
     ).build();
 
     
     // Fooに対するシリアライザを作成する
-    Serializer<Foo>serializer = new Serializer<>(fooAdapter);
+    Serializer<Foo>serializer = new Serializer<>(fooHandler);
     
     // JSON文字列
     String json;

@@ -46,10 +46,10 @@ public class UnknownTest {
   }
 
 
-  static Adapter<Bar>BAR_ADAPTER = new AdapterBuilder<>(Bar.class).addSubAdapter(
-      new AdapterBuilder<List<Map<String, String>>>(new TypeToken<List<Map<String, String>>>(){}).build()
+  static Handler<Bar>BAR_ADAPTER = new HandlerBuilder<>(Bar.class).addSubHandler(
+      new HandlerBuilder<List<Map<String, String>>>(new TypeToken<List<Map<String, String>>>(){}).build()
    ).build();
-  static Adapter<Foo>FOO_ADAPTER = new AdapterBuilder<>(Foo.class).addSubAdapter(BAR_ADAPTER).build();
+  static Handler<Foo>FOO_ADAPTER = new HandlerBuilder<>(Foo.class).addSubHandler(BAR_ADAPTER).build();
 
   
   /**

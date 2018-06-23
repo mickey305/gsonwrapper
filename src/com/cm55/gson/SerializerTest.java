@@ -213,8 +213,8 @@ public class SerializerTest {
    *
    */
   public static class VariousHashMapAdapter  {
-    public static  Adapter<HashMap<Various, String>> INSTANCE = 
-        new AdapterBuilder<>(new TypeToken<HashMap<Various, String>>() {}).addSubAdapter(FooAdapter.INSTANCE).build();
+    public static  Handler<HashMap<Various, String>> INSTANCE = 
+        new HandlerBuilder<>(new TypeToken<HashMap<Various, String>>() {}).addSubHandler(FooAdapter.INSTANCE).build();
   }
   
   // ArrayList of Various /////////////////////////////////////////////////////
@@ -225,9 +225,9 @@ public class SerializerTest {
    *
    */
   public static class VariousArrayListAdapter  {
-    public static Adapter<ArrayList<Various>> INSTANCE = 
-        new AdapterBuilder<>(new TypeToken<ArrayList<Various>>() {}).
-      addSubAdapter(FooAdapter.INSTANCE).build();
+    public static Handler<ArrayList<Various>> INSTANCE = 
+        new HandlerBuilder<>(new TypeToken<ArrayList<Various>>() {}).
+      addSubHandler(FooAdapter.INSTANCE).build();
     
   }
 
@@ -265,8 +265,8 @@ public class SerializerTest {
   }
 
   public static class VariousAdapter  {    
-    public static  Adapter<Various> INSTANCE = 
-        new AdapterBuilder<>(Various.class).addSubAdapter(FooAdapter.INSTANCE).build();
+    public static  Handler<Various> INSTANCE = 
+        new HandlerBuilder<>(Various.class).addSubHandler(FooAdapter.INSTANCE).build();
     
   }
 
@@ -312,7 +312,7 @@ public class SerializerTest {
   }
   
   public static class FooAdapter  {    
-    public static MultiTypeAdapter<Foo> INSTANCE = new MultiTypeAdapterBuilder<>(Foo.class)
+    public static MultiHandler<Foo> INSTANCE = new MultiHandlerBuilder<>(Foo.class)
         .addSubClasses(FooOne.class, FooTwo.class).build();
     
   }

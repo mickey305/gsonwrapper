@@ -17,7 +17,7 @@ public class SerializeNullsTest {
   
   @Before
   public void before() {
-    serializer = new Serializer<>(new AdapterBuilder<>(Sample.class).build());
+    serializer = new Serializer<>(new HandlerBuilder<>(Sample.class).build());
   }
   
   @Test
