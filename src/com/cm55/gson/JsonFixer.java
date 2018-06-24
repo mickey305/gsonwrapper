@@ -89,8 +89,8 @@ public class JsonFixer {
   /**
    * 空配列があったら、その項目自体を削除する。
    * <p>
-   * これはMAKESHOPのJSON-APIで起こるのだが、中身がある場合にはJSONオブジェクトとして得られるが、
-   * 中身の無い場合には、何故か空のJSON配列になっている。この場合に項目自体を削除する。
+   * 中身がある場合にはJSONオブジェクトとして得られるが、中身の無い場合には、何故か空のJSON配列になっていることがある。
+   * この場合に項目自体を削除する。
    * </p>
    */
   public static class DropEmptyArray extends Node {
